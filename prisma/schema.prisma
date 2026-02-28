@@ -1,0 +1,162 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Nature {
+  ASSET
+  LIABILITY
+  INCOME
+  EXPENSE
+  EQUITY
+}
+
+enum DrCr {
+  DR
+  CR
+}
+
+enum PartyType {
+  MEMBER
+  VENDOR
+  SPONSOR
+  OTHER
+}
+
+enum BloodGroup {
+  A_POS
+  A_NEG
+  B_POS
+  B_NEG
+  O_POS
+  O_NEG
+  AB_POS
+  AB_NEG
+}
+
+enum MembershipStatus {
+  PENDING
+  BASIC
+  GOLD
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum TransactionType {
+  RECEIPT
+  PAYMENT
+  CONTRA
+  JOURNAL
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  memberId  String?  @unique
+  member    Member?  @relation(fields: [memberId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdTransactions   Transaction[] @relation("CreatedTransactions")
+  collectedTransactions Transaction[] @relation("CollectedTransactions")
+}
+
+model Member {
+  id               String           @id @default(uuid())
+  membershipCode   String           @unique
+  name             String
+  address1         String
+  address2         String?
+  address3         String?
+  aadhaarNo        String           @unique
+  mobile           String
+  email            String?
+  dob              DateTime
+  bloodGroup       BloodGroup
+  photoUrl         String?
+  isExecutive      Boolean          @default(false)
+  membershipStatus MembershipStatus @default(PENDING)
+  totalPaid        Decimal          @default(0) @db.Decimal(12, 2)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  user         User?
+  ledger       Ledger?
+  transactions Transaction[]
+}
+
+model LedgerGroup {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  nature      Nature
+  isSystem    Boolean  @default(false)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ledgers Ledger[]
+}
+
+model Ledger {
+  id             String      @id @default(uuid())
+  name           String      @unique
+  code           String      @unique
+  groupId        String
+  group          LedgerGroup @relation(fields: [groupId], references: [id])
+  isSystem       Boolean     @default(false)
+  description    String?
+  openingBalance Decimal     @default(0) @db.Decimal(12, 2)
+  openingType    DrCr        @default(DR)
+  openingDate    DateTime?
+
+  partyType PartyType?
+  memberId  String?    @unique
+  member    Member?    @relation(fields: [memberId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lines TransactionLine[]
+}
+
+model Transaction {
+  id            String          @id @default(uuid())
+  referenceNo   String          @unique
+  type          TransactionType
+  date          DateTime
+  narration     String
+  totalAmount   Decimal         @db.Decimal(12, 2)
+  createdById   String
+  createdBy     User            @relation("CreatedTransactions", fields: [createdById], references: [id])
+  collectedById String?
+  collectedBy   User?           @relation("CollectedTransactions", fields: [collectedById], references: [id])
+  memberId      String?
+  member        Member?         @relation(fields: [memberId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  lines TransactionLine[]
+}
+
+model TransactionLine {
+  id            String      @id @default(uuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  ledgerId      String
+  ledger        Ledger      @relation(fields: [ledgerId], references: [id])
+  debit         Decimal     @default(0) @db.Decimal(12, 2)
+  credit        Decimal     @default(0) @db.Decimal(12, 2)
+  description   String?
+  createdAt     DateTime    @default(now())
+}
