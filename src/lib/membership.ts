@@ -17,16 +17,16 @@ export async function generateMembershipCode(): Promise<string> {
 }
 
 /**
- * Create member + auto-create party ledger in a single transaction.
+ * Create member + auto-create income ledger under "Membership Income" group.
  * Never create a member directly — always use this function.
  */
 export async function createMemberWithLedger(data: CreateMemberInput) {
     const membershipCode = await generateMembershipCode()
 
     const group = await prisma.ledgerGroup.findUnique({
-        where: { name: "Members" },
+        where: { name: "Membership Income" },
     })
-    if (!group) throw new Error("Members ledger group not found. Run seed first.")
+    if (!group) throw new Error("Membership Income ledger group not found. Run seed first.")
 
     return await prisma.$transaction(async (tx) => {
         // 1. Create the member
@@ -47,17 +47,17 @@ export async function createMemberWithLedger(data: CreateMemberInput) {
             },
         })
 
-        // 2. Auto-create party ledger linked to member
+        // 2. Auto-create income ledger under "Membership Income" linked to member
         await tx.ledger.create({
             data: {
                 code: membershipCode,
-                name: data.name,
+                name: `${data.name} (${membershipCode})`,
                 groupId: group.id,
                 partyType: "MEMBER",
                 memberId: member.id,
                 isSystem: false,
-                openingType: DrCr.DR,
-                description: `Party ledger for member ${membershipCode}`,
+                openingType: DrCr.CR,
+                description: `Membership income ledger for ${membershipCode}`,
             },
         })
 
@@ -67,23 +67,21 @@ export async function createMemberWithLedger(data: CreateMemberInput) {
 
 /**
  * Recalculate totalPaid and membershipStatus for a member
- * based on their membership fee transaction lines.
+ * based on credits to their personal membership income ledger.
  *
- * Call after every receipt that credits the "Membership Fee" ledger
- * for this member.
+ * Call after every receipt that credits the member's ledger.
  */
 export async function recalculateMemberStatus(memberId: string) {
-    // Find the "Membership Fee" ledger
-    const membershipFeeLedger = await prisma.ledger.findUnique({
-        where: { code: "4001" }, // Membership Fee
+    // Find the member's own income ledger
+    const memberLedger = await prisma.ledger.findUnique({
+        where: { memberId },
     })
-    if (!membershipFeeLedger) return
+    if (!memberLedger) return
 
-    // Sum all credits to Membership Fee where transaction.memberId = memberId
+    // Sum all credits to the member's income ledger
     const result = await prisma.transactionLine.aggregate({
         where: {
-            ledgerId: membershipFeeLedger.id,
-            transaction: { memberId },
+            ledgerId: memberLedger.id,
         },
         _sum: { credit: true },
     })
@@ -102,3 +100,4 @@ export async function recalculateMemberStatus(memberId: string) {
         data: { totalPaid, membershipStatus },
     })
 }
+

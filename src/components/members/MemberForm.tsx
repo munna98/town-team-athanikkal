@@ -44,7 +44,7 @@ export function MemberForm({
     const isEditing = !!memberId
 
     const form = useForm<CreateMemberInput>({
-        resolver: zodResolver(createMemberSchema),
+        resolver: zodResolver(createMemberSchema) as any,
         defaultValues: {
             name: initialData?.name || "",
             address1: initialData?.address1 || "",
@@ -132,7 +132,7 @@ export function MemberForm({
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Blood Group *</FormLabel>
-                                            <Select prefix={field.value} onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Select" />

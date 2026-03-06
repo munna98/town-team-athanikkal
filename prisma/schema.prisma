@@ -69,7 +69,6 @@ model User {
   updatedAt DateTime @updatedAt
 
   createdTransactions   Transaction[] @relation("CreatedTransactions")
-  collectedTransactions Transaction[] @relation("CollectedTransactions")
 }
 
 model Member {
@@ -91,9 +90,9 @@ model Member {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  user         User?
-  ledger       Ledger?
-  transactions Transaction[]
+  user   User?
+  ledger Ledger?
+  collectedTransactions Transaction[] @relation("CollectedTransactions")
 }
 
 model LedgerGroup {
@@ -140,9 +139,7 @@ model Transaction {
   createdById   String
   createdBy     User            @relation("CreatedTransactions", fields: [createdById], references: [id])
   collectedById String?
-  collectedBy   User?           @relation("CollectedTransactions", fields: [collectedById], references: [id])
-  memberId      String?
-  member        Member?         @relation(fields: [memberId], references: [id])
+  collectedBy   Member?         @relation("CollectedTransactions", fields: [collectedById], references: [id])
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 

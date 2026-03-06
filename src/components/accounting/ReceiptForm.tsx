@@ -15,18 +15,16 @@ import {
     Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form"
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel
 } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
 
 export function ReceiptForm({
     ledgers,
-    users,
-    members
+    executives
 }: {
     ledgers: any[]
-    users: any[]
-    members: any[]
+    executives: any[]
 }) {
     const [isLoading, setIsLoading] = useState(false)
 
@@ -39,19 +37,11 @@ export function ReceiptForm({
             incomeLedgerId: "",
             collectedById: "",
             narration: "",
-            memberId: "",
-            memberName: "",
         },
     })
 
     // Group ledgers for the dropdown
     const incomeLedgers = ledgers.filter(l => l.group.nature === "INCOME")
-    const partyLedgers = ledgers.filter(l => l.partyType === "MEMBER")
-
-    // Find Membership Fee ledger specifically for smart defaults
-    const membershipFeeLedger = incomeLedgers.find(l => l.code === "4001")
-
-    const watchIncomeLedger = form.watch("incomeLedgerId")
 
     async function onSubmit(data: ReceiptInput) {
         setIsLoading(true)
@@ -65,8 +55,6 @@ export function ReceiptForm({
                     ...form.getValues(),
                     amount: 0,
                     narration: "",
-                    memberId: "",
-                    memberName: ""
                 })
             }
         } catch (error) {
@@ -127,7 +115,7 @@ export function ReceiptForm({
                                 name="incomeLedgerId"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Credit Account (Income/Party) *</FormLabel>
+                                        <FormLabel>Credit Account (Income) *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
@@ -135,18 +123,14 @@ export function ReceiptForm({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <optgroup label="Income Ledgers">
+                                                <SelectGroup>
+                                                    <SelectLabel>Income Ledgers</SelectLabel>
                                                     {incomeLedgers.map(l => (
-                                                        <SelectItem key={l.id} value={l.id}>{l.name} ({l.code})</SelectItem>
+                                                        <SelectItem key={l.id} value={l.id}>
+                                                            {l.name} {l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
+                                                        </SelectItem>
                                                     ))}
-                                                </optgroup>
-                                                {partyLedgers.length > 0 && (
-                                                    <optgroup label="Member Party Ledgers">
-                                                        {partyLedgers.map(l => (
-                                                            <SelectItem key={l.id} value={l.id}>{l.code} - {l.name}</SelectItem>
-                                                        ))}
-                                                    </optgroup>
-                                                )}
+                                                </SelectGroup>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -168,52 +152,19 @@ export function ReceiptForm({
                                 )}
                             />
 
-                            {/* Show member selection if Membership Fee is selected or as optional linked member */}
-                            {(watchIncomeLedger === membershipFeeLedger?.id) && (
-                                <div className="md:col-span-2 p-4 bg-sky-50 rounded-lg border border-sky-100">
-                                    <FormField
-                                        control={form.control}
-                                        name="memberId"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Link to Member (Required for Membership Fee) *</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger className="bg-white">
-                                                            <SelectValue placeholder="Select member" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        {members.map(m => (
-                                                            <SelectItem key={m.id} value={m.id}>{m.membershipCode} - {m.name}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <p className="text-xs text-sky-600 mt-2">
-                                        Linking a member to "Membership Fee" will count towards their lifetime totalPaid and could upgrade their membership tier.
-                                    </p>
-                                </div>
-                            )}
-
-                            <div className="md:col-span-2">
-                                <FormField
-                                    control={form.control}
-                                    name="narration"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Narration / Description *</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g., Monthly fee for July, Advance payment..." {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                            <FormField
+                                control={form.control}
+                                name="narration"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Narration / Description</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., Monthly fee for July, Advance payment..." {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
                             <FormField
                                 control={form.control}
@@ -228,8 +179,10 @@ export function ReceiptForm({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                {users.map(u => (
-                                                    <SelectItem key={u.id} value={u.id}>{u.email} ({u.role})</SelectItem>
+                                                {executives.map(e => (
+                                                    <SelectItem key={e.id} value={e.id}>
+                                                        {e.name}
+                                                    </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -251,3 +204,4 @@ export function ReceiptForm({
         </Card>
     )
 }
+

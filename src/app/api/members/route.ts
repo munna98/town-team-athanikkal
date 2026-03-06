@@ -12,6 +12,7 @@ export async function GET(req: Request) {
     const query = searchParams.get("q")
     const status = searchParams.get("status")
     const isExecutive = searchParams.get("isExecutive")
+    const bloodGroup = searchParams.get("bloodGroup")
 
     const where: any = {}
 
@@ -29,6 +30,12 @@ export async function GET(req: Request) {
 
     if (isExecutive === "true") {
         where.isExecutive = true
+    } else if (isExecutive === "false") {
+        where.isExecutive = false
+    }
+
+    if (bloodGroup && bloodGroup !== "ALL") {
+        where.bloodGroup = bloodGroup
     }
 
     try {

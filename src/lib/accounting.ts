@@ -61,7 +61,6 @@ interface JournalEntryData {
     type: TransactionType
     date: Date
     narration: string
-    memberId?: string
     collectedById?: string
     createdById: string
     lines: { ledgerId: string; debit: number; credit: number; description?: string }[]
@@ -88,7 +87,6 @@ export async function createJournalEntry(data: JournalEntryData) {
                 totalAmount: new Decimal(totalDebit),
                 createdById: data.createdById,
                 collectedById: data.collectedById || null,
-                memberId: data.memberId || null,
                 lines: {
                     create: data.lines.map((line) => ({
                         ledgerId: line.ledgerId,

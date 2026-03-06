@@ -1,5 +1,4 @@
-import prisma from "@/lib/prisma"
-import { getLedgerBalance, getTrialBalance } from "@/lib/accounting"
+import { getTrialBalance, getLedgerStatement } from "@/lib/accounting"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -15,41 +14,38 @@ export default async function ReportsPage({
     const selectedLedgerId = resolvedParams.ledger
 
     // 1. Fetch Trial Balance Data
-    const tbData = await getTrialBalance(new Date())
+    const tbRows = await getTrialBalance()
 
-    const totalTbDebit = tbData.reduce((sum, item) => sum + (item.balance > 0 ? item.balance : 0), 0)
-    const totalTbCredit = tbData.reduce((sum, item) => sum + (item.balance < 0 ? Math.abs(item.balance) : 0), 0)
+    const totalTbDebit = tbRows.reduce((sum, row) => sum + row.debit, 0)
+    const totalTbCredit = tbRows.reduce((sum, row) => sum + row.credit, 0)
 
-    // 2. Fetch specific Ledger Statement Data if requested
-    let ledgerStatement: any = null
-    let specificLedger: any = null
+    // 2. Fetch specific Ledger Statement if requested
+    let stmtData: Awaited<ReturnType<typeof getLedgerStatement>> | null = null
     if (selectedLedgerId) {
-        specificLedger = await prisma.ledger.findUnique({ where: { id: selectedLedgerId } })
-        if (specificLedger) {
-            ledgerStatement = await getLedgerBalance(specificLedger.id, new Date())
+        try {
+            stmtData = await getLedgerStatement(selectedLedgerId)
+        } catch {
+            stmtData = null
         }
     }
 
-    const allLedgers = await prisma.ledger.findMany({ orderBy: { name: 'asc' } })
+    // 3. Compute Income & Expenditure from TB
+    const incomeRows = tbRows.filter(r => r.nature === "INCOME")
+    const expenseRows = tbRows.filter(r => r.nature === "EXPENSE")
 
-    // 3. Compute Income & Expenditure
-    const incomeLedgers = tbData.filter(item => item.nature === "INCOME")
-    const expenseLedgers = tbData.filter(item => item.nature === "EXPENSE")
-
-    const totalIncome = incomeLedgers.reduce((sum, item) => sum + Math.abs(item.balance), 0)
-    const totalExpense = expenseLedgers.reduce((sum, item) => sum + (item.balance > 0 ? item.balance : 0), 0)
+    const totalIncome = incomeRows.reduce((sum, r) => sum + r.credit, 0)
+    const totalExpense = expenseRows.reduce((sum, r) => sum + r.debit, 0)
     const surplusDeficit = totalIncome - totalExpense
 
-    // 4. Compute Balance Sheet
-    const assets = tbData.filter(item => item.nature === "ASSET")
-    const liabilities = tbData.filter(item => item.nature === "LIABILITY")
-    const equity = tbData.filter(item => item.nature === "EQUITY")
+    // 4. Compute Balance Sheet from TB
+    const assetRows = tbRows.filter(r => r.nature === "ASSET")
+    const liabilityRows = tbRows.filter(r => r.nature === "LIABILITY")
+    const equityRows = tbRows.filter(r => r.nature === "EQUITY")
 
-    const totalAssets = assets.reduce((sum, item) => sum + (item.balance > 0 ? item.balance : 0), 0)
-    const totalLiabilities = liabilities.reduce((sum, item) => sum + Math.abs(item.balance), 0)
-    const totalEquity = equity.reduce((sum, item) => sum + Math.abs(item.balance), 0)
+    const totalAssets = assetRows.reduce((sum, r) => sum + r.debit - r.credit, 0)
+    const totalLiabilities = liabilityRows.reduce((sum, r) => sum + r.credit - r.debit, 0)
+    const totalEquity = equityRows.reduce((sum, r) => sum + r.credit - r.debit, 0)
 
-    // BS Liability side = Liabilities + Equity + Surplus
     const bsTotalL = totalLiabilities + totalEquity + surplusDeficit
     const bsTotalA = totalAssets
 
@@ -68,6 +64,7 @@ export default async function ReportsPage({
                     <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>
                 </TabsList>
 
+                {/* ─── Trial Balance ─── */}
                 <TabsContent value="trial-balance">
                     <Card>
                         <CardHeader>
@@ -78,26 +75,26 @@ export default async function ReportsPage({
                                 <Table>
                                     <TableHeader className="bg-slate-50">
                                         <TableRow>
-                                            <TableHead>Account Code</TableHead>
+                                            <TableHead>Code</TableHead>
                                             <TableHead>Ledger Name</TableHead>
                                             <TableHead>Nature</TableHead>
-                                            <TableHead className="text-right text-emerald-700 font-bold">Debit (+)</TableHead>
-                                            <TableHead className="text-right text-red-700 font-bold">Credit (-)</TableHead>
+                                            <TableHead className="text-right text-emerald-700 font-bold">Debit</TableHead>
+                                            <TableHead className="text-right text-red-700 font-bold">Credit</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {tbData.filter(item => Math.abs(item.balance) > 0.01).map((item) => (
-                                            <TableRow key={item.ledgerId}>
-                                                <TableCell className="text-slate-500">{item.code}</TableCell>
-                                                <TableCell className="font-medium text-slate-800">{item.name}</TableCell>
+                                        {tbRows.filter(r => r.debit !== 0 || r.credit !== 0).map((row) => (
+                                            <TableRow key={row.ledgerId}>
+                                                <TableCell className="text-slate-500">{row.ledgerCode}</TableCell>
+                                                <TableCell className="font-medium text-slate-800">{row.ledgerName}</TableCell>
                                                 <TableCell>
-                                                    <Badge variant="outline" className="text-[10px] text-slate-500">{item.nature}</Badge>
+                                                    <Badge variant="outline" className="text-[10px] text-slate-500">{row.nature}</Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    {item.balance > 0 ? formatCurrency(item.balance) : "-"}
+                                                    {row.debit > 0 ? formatCurrency(row.debit) : "-"}
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    {item.balance < 0 ? formatCurrency(Math.abs(item.balance)) : "-"}
+                                                    {row.credit > 0 ? formatCurrency(row.credit) : "-"}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -113,33 +110,40 @@ export default async function ReportsPage({
                     </Card>
                 </TabsContent>
 
+                {/* ─── Ledger Statement ─── */}
                 <TabsContent value="statement">
                     <Card>
                         <CardHeader>
                             <CardTitle>
-                                {specificLedger ? `Statement of Account: ${specificLedger.name}` : 'Select a Ledger from Chart of Accounts'}
+                                {stmtData ? `Statement: ${stmtData.ledger.name} (${stmtData.ledger.code})` : "Select a Ledger from Chart of Accounts"}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {ledgerStatement ? (
+                            {stmtData ? (
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div className="p-4 bg-slate-50 rounded-lg border">
                                             <div className="text-sm text-slate-500">Opening Balance</div>
-                                            <div className="text-xl font-bold">{formatCurrency(Math.abs(ledgerStatement.openingBalance))} {ledgerStatement.openingBalance > 0 ? "Dr" : "Cr"}</div>
+                                            <div className="text-xl font-bold">
+                                                {formatCurrency(stmtData.openingBalance)} {stmtData.openingType}
+                                            </div>
                                         </div>
                                         <div className="p-4 bg-slate-50 rounded-lg border">
                                             <div className="text-sm text-slate-500">Total Debits</div>
-                                            <div className="text-xl font-bold text-emerald-600">{formatCurrency(ledgerStatement.totalDebits)}</div>
+                                            <div className="text-xl font-bold text-emerald-600">
+                                                {formatCurrency(stmtData.statement.reduce((s, l) => s + l.debit, 0))}
+                                            </div>
                                         </div>
                                         <div className="p-4 bg-slate-50 rounded-lg border">
                                             <div className="text-sm text-slate-500">Total Credits</div>
-                                            <div className="text-xl font-bold text-red-600">{formatCurrency(ledgerStatement.totalCredits)}</div>
+                                            <div className="text-xl font-bold text-red-600">
+                                                {formatCurrency(stmtData.statement.reduce((s, l) => s + l.credit, 0))}
+                                            </div>
                                         </div>
                                         <div className="p-4 bg-sky-50 rounded-lg border border-sky-200">
                                             <div className="text-sm text-sky-700 font-semibold">Closing Balance</div>
                                             <div className="text-2xl font-black text-sky-900">
-                                                {formatCurrency(Math.abs(ledgerStatement.closingBalance))} {ledgerStatement.closingBalance > 0 ? "Dr" : "Cr"}
+                                                {formatCurrency(Math.abs(stmtData.closingBalance))} {stmtData.closingBalance >= 0 ? "Dr" : "Cr"}
                                             </div>
                                         </div>
                                     </div>
@@ -151,26 +155,26 @@ export default async function ReportsPage({
                                                     <TableHead>Date</TableHead>
                                                     <TableHead>Voucher</TableHead>
                                                     <TableHead>Narration</TableHead>
-                                                    <TableHead className="text-right text-emerald-700">Debit (Dr)</TableHead>
-                                                    <TableHead className="text-right text-red-700">Credit (Cr)</TableHead>
+                                                    <TableHead className="text-right text-emerald-700">Debit</TableHead>
+                                                    <TableHead className="text-right text-red-700">Credit</TableHead>
                                                     <TableHead className="text-right">Balance</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
-                                                {ledgerStatement.transactions.length === 0 && (
+                                                {stmtData.statement.length === 0 && (
                                                     <TableRow>
                                                         <TableCell colSpan={6} className="text-center py-6 text-slate-500">No transactions recorded.</TableCell>
                                                     </TableRow>
                                                 )}
-                                                {ledgerStatement.transactions.map((tx: any, index: number) => (
-                                                    <TableRow key={index}>
+                                                {stmtData.statement.map((tx, idx) => (
+                                                    <TableRow key={idx}>
                                                         <TableCell>{formatDate(tx.date)}</TableCell>
                                                         <TableCell className="font-mono text-xs text-sky-600">{tx.referenceNo}</TableCell>
                                                         <TableCell className="text-sm">{tx.narration}</TableCell>
                                                         <TableCell className="text-right">{tx.debit > 0 ? formatCurrency(tx.debit) : ""}</TableCell>
                                                         <TableCell className="text-right">{tx.credit > 0 ? formatCurrency(tx.credit) : ""}</TableCell>
                                                         <TableCell className="text-right font-medium text-slate-600">
-                                                            {formatCurrency(Math.abs(tx.runningBalance))} {tx.runningBalance > 0 ? "Dr" : "Cr"}
+                                                            {formatCurrency(Math.abs(tx.balance))} {tx.balance >= 0 ? "Dr" : "Cr"}
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
@@ -180,13 +184,14 @@ export default async function ReportsPage({
                                 </div>
                             ) : (
                                 <div className="text-center py-12 text-slate-500 border rounded-lg bg-slate-50">
-                                    <p>Go to Chart of Accounts and click "Stmt" on any ledger to view its transactions here.</p>
+                                    <p>Go to Chart of Accounts and click &ldquo;Stmt&rdquo; on any ledger to view its transactions here.</p>
                                 </div>
                             )}
                         </CardContent>
                     </Card>
                 </TabsContent>
 
+                {/* ─── Income & Expenditure ─── */}
                 <TabsContent value="income">
                     <Card>
                         <CardHeader>
@@ -194,16 +199,15 @@ export default async function ReportsPage({
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Expenditure Side */}
                                 <div className="space-y-4">
                                     <h3 className="font-bold text-lg text-rose-700 bg-rose-50 px-4 py-2 rounded-md">Expenditure</h3>
                                     <div className="border rounded-md">
                                         <Table>
                                             <TableBody>
-                                                {expenseLedgers.map(item => (
-                                                    <TableRow key={item.ledgerId}>
-                                                        <TableCell>{item.name}</TableCell>
-                                                        <TableCell className="text-right font-medium">{formatCurrency(item.balance)}</TableCell>
+                                                {expenseRows.map(r => (
+                                                    <TableRow key={r.ledgerId}>
+                                                        <TableCell>{r.ledgerName}</TableCell>
+                                                        <TableCell className="text-right font-medium">{formatCurrency(r.debit)}</TableCell>
                                                     </TableRow>
                                                 ))}
                                                 {surplusDeficit > 0 && (
@@ -223,16 +227,15 @@ export default async function ReportsPage({
                                     </div>
                                 </div>
 
-                                {/* Income Side */}
                                 <div className="space-y-4">
                                     <h3 className="font-bold text-lg text-sky-700 bg-sky-50 px-4 py-2 rounded-md">Income</h3>
                                     <div className="border rounded-md">
                                         <Table>
                                             <TableBody>
-                                                {incomeLedgers.map(item => (
-                                                    <TableRow key={item.ledgerId}>
-                                                        <TableCell>{item.name}</TableCell>
-                                                        <TableCell className="text-right font-medium">{formatCurrency(Math.abs(item.balance))}</TableCell>
+                                                {incomeRows.map(r => (
+                                                    <TableRow key={r.ledgerId}>
+                                                        <TableCell>{r.ledgerName}</TableCell>
+                                                        <TableCell className="text-right font-medium">{formatCurrency(r.credit)}</TableCell>
                                                     </TableRow>
                                                 ))}
                                                 {surplusDeficit < 0 && (
@@ -256,6 +259,7 @@ export default async function ReportsPage({
                     </Card>
                 </TabsContent>
 
+                {/* ─── Balance Sheet ─── */}
                 <TabsContent value="balance-sheet">
                     <Card>
                         <CardHeader>
@@ -263,22 +267,21 @@ export default async function ReportsPage({
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Liabilities Side */}
                                 <div className="space-y-4">
                                     <h3 className="font-bold text-lg text-orange-700 bg-orange-50 px-4 py-2 rounded-md">Liabilities & Equity</h3>
                                     <div className="border rounded-md">
                                         <Table>
                                             <TableBody>
-                                                {equity.map(item => (
-                                                    <TableRow key={item.ledgerId}>
-                                                        <TableCell>{item.name}</TableCell>
-                                                        <TableCell className="text-right font-medium">{formatCurrency(Math.abs(item.balance))}</TableCell>
+                                                {equityRows.map(r => (
+                                                    <TableRow key={r.ledgerId}>
+                                                        <TableCell>{r.ledgerName}</TableCell>
+                                                        <TableCell className="text-right font-medium">{formatCurrency(r.credit - r.debit)}</TableCell>
                                                     </TableRow>
                                                 ))}
-                                                {liabilities.map(item => (
-                                                    <TableRow key={item.ledgerId}>
-                                                        <TableCell>{item.name}</TableCell>
-                                                        <TableCell className="text-right font-medium">{formatCurrency(Math.abs(item.balance))}</TableCell>
+                                                {liabilityRows.map(r => (
+                                                    <TableRow key={r.ledgerId}>
+                                                        <TableCell>{r.ledgerName}</TableCell>
+                                                        <TableCell className="text-right font-medium">{formatCurrency(r.credit - r.debit)}</TableCell>
                                                     </TableRow>
                                                 ))}
                                                 <TableRow className="bg-slate-50 text-slate-700 font-bold border-t-2">
@@ -294,16 +297,15 @@ export default async function ReportsPage({
                                     </div>
                                 </div>
 
-                                {/* Assets Side */}
                                 <div className="space-y-4">
                                     <h3 className="font-bold text-lg text-emerald-700 bg-emerald-50 px-4 py-2 rounded-md">Assets</h3>
                                     <div className="border rounded-md">
                                         <Table>
                                             <TableBody>
-                                                {assets.map(item => (
-                                                    <TableRow key={item.ledgerId}>
-                                                        <TableCell>{item.name}</TableCell>
-                                                        <TableCell className="text-right font-medium">{formatCurrency(item.balance)}</TableCell>
+                                                {assetRows.map(r => (
+                                                    <TableRow key={r.ledgerId}>
+                                                        <TableCell>{r.ledgerName}</TableCell>
+                                                        <TableCell className="text-right font-medium">{formatCurrency(r.debit - r.credit)}</TableCell>
                                                     </TableRow>
                                                 ))}
                                                 <TableRow className="bg-slate-100 font-black text-lg h-[92px]">

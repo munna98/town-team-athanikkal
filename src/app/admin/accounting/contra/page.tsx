@@ -2,10 +2,13 @@ import { ContraForm } from "@/components/accounting/ContraForm"
 import prisma from "@/lib/prisma"
 
 export default async function ContraPage() {
-    const ledgers = await prisma.ledger.findMany({
+    const rawLedgers = await prisma.ledger.findMany({
         include: { group: true },
         orderBy: { name: "asc" }
     })
+
+    // Convert Decimal objects to plain numbers for client component serialization
+    const ledgers = JSON.parse(JSON.stringify(rawLedgers))
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto">

@@ -166,7 +166,7 @@ export function ContraForm({ ledgers }: { ledgers: any[] }) {
                             name="narration"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Narration / Description *</FormLabel>
+                                    <FormLabel>Narration / Description</FormLabel>
                                     <FormControl>
                                         <Input placeholder="e.g., Cash deposited into Bank, Cash withdrawn..." {...field} />
                                     </FormControl>

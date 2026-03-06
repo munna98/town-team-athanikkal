@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate, bloodGroupLabels, membershipStatusConfig } from "@/lib/utils"
-import { ArrowLeft, Edit, FileText, Download, Phone, Mail, MapPin, Calendar, Activity, CreditCard } from "lucide-react"
+import { ArrowLeft, Edit, FileText, Phone, Mail, MapPin, Calendar, Activity, CreditCard } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
+import { DownloadCardButton, DownloadReceiptButton } from "@/components/pdf/DownloadButtons"
 
 export default async function MemberDetailPage({
     params,
@@ -20,24 +21,39 @@ export default async function MemberDetailPage({
         where: { id },
         include: {
             ledger: true,
-            transactions: {
-                orderBy: { date: 'desc' },
-                take: 5,
-                include: {
-                    lines: {
-                        where: {
-                            ledger: {
-                                group: { name: "Membership Income" }
-                            }
-                        }
-                    }
-                }
-            }
         }
     })
 
     if (!member) {
         notFound()
+    }
+
+    // Fetch recent transactions via the member's ledger (TransactionLine → Transaction)
+    let recentTransactions: any[] = []
+    if (member.ledger) {
+        const txnLines = await prisma.transactionLine.findMany({
+            where: { ledgerId: member.ledger.id },
+            include: {
+                transaction: {
+                    include: {
+                        lines: {
+                            include: { ledger: true }
+                        }
+                    }
+                }
+            },
+            orderBy: { transaction: { date: "desc" } },
+            take: 5,
+        })
+        // Deduplicate transactions (a transaction may have multiple lines on same ledger)
+        const seen = new Set<string>()
+        recentTransactions = txnLines
+            .map(tl => tl.transaction)
+            .filter(txn => {
+                if (seen.has(txn.id)) return false
+                seen.add(txn.id)
+                return true
+            })
     }
 
     const statusConf = membershipStatusConfig[member.membershipStatus]
@@ -86,10 +102,7 @@ export default async function MemberDetailPage({
                 </div>
                 <div className="flex gap-2">
                     {member.membershipStatus !== "PENDING" && (
-                        <Button variant="outline" className="border-sky-200 text-sky-700 hover:bg-sky-50">
-                            <Download className="mr-2 h-4 w-4" />
-                            {member.membershipStatus === "GOLD" ? "Gold ID Card" : "Basic ID Card"}
-                        </Button>
+                        <DownloadCardButton memberId={member.id} status={member.membershipStatus} />
                     )}
                     <Link href={`/admin/members/${member.id}/edit`}>
                         <Button variant="outline">
@@ -116,7 +129,7 @@ export default async function MemberDetailPage({
                                 </div>
                                 <div className="text-right">
                                     <div className="text-sm text-slate-500 mb-1">Total Paid</div>
-                                    <div className="text-2xl font-bold text-slate-800">{formatCurrency(member.totalPaid)}</div>
+                                    <div className="text-2xl font-bold text-slate-800">{formatCurrency(Number(member.totalPaid))}</div>
                                 </div>
                             </div>
 
@@ -207,26 +220,27 @@ export default async function MemberDetailPage({
                             </Link>
                         </CardHeader>
                         <CardContent className="pt-6">
-                            {member.transactions.length === 0 ? (
+                            {recentTransactions.length === 0 ? (
                                 <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed">
                                     <p>No transactions recorded yet.</p>
-                                    <Link href={`/admin/accounting/receipts?member=${member.id}`}>
+                                    <Link href={`/admin/accounting/receipts`}>
                                         <Button variant="link" className="text-sky-600">Record a Receipt</Button>
                                     </Link>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {member.transactions.map(txn => (
+                                    {recentTransactions.map((txn: any) => (
                                         <div key={txn.id} className="flex justify-between items-center p-4 border rounded-lg hover:bg-slate-50 transition">
                                             <div>
                                                 <div className="font-semibold text-slate-800">{txn.referenceNo}</div>
                                                 <div className="text-sm text-slate-500">{formatDate(txn.date)} &middot; {txn.narration}</div>
-                                            </div>
-                                            <div className="text-right">
-                                                <div className="font-bold text-sky-600">{formatCurrency(txn.totalAmount)}</div>
-                                                {txn.lines.some(l => l.credit > 0) && (
+                                                {txn.lines.some((l: any) => Number(l.credit) > 0) && (
                                                     <div className="text-[10px] text-emerald-600 font-semibold uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded inline-block mt-1">Fee Recorded</div>
                                                 )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="font-bold text-sky-600">{formatCurrency(Number(txn.totalAmount))}</div>
+                                                <DownloadReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} />
                                             </div>
                                         </div>
                                     ))}

@@ -15,7 +15,7 @@ import {
     Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form"
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel
 } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
 
@@ -30,7 +30,6 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
             cashOrBank: "CASH",
             expenseLedgerId: "",
             narration: "",
-            paidTo: "",
         },
     })
 
@@ -54,7 +53,6 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                     ...form.getValues(),
                     amount: 0,
                     narration: "",
-                    paidTo: ""
                 })
             }
         } catch (error) {
@@ -123,24 +121,31 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <optgroup label="Expense Ledgers">
+                                                <SelectGroup>
+                                                    <SelectLabel>Expense Ledgers</SelectLabel>
                                                     {pureExpense.map(l => (
-                                                        <SelectItem key={l.id} value={l.id}>{l.name} ({l.code})</SelectItem>
+                                                        <SelectItem key={l.id} value={l.id}>
+                                                            {l.name} {l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
+                                                        </SelectItem>
                                                     ))}
-                                                </optgroup>
+                                                </SelectGroup>
                                                 {partyLedgers.length > 0 && (
-                                                    <optgroup label="Party Ledgers (Advances/Settlements)">
+                                                    <SelectGroup>
+                                                        <SelectLabel>Party Ledgers (Advances/Settlements)</SelectLabel>
                                                         {partyLedgers.map(l => (
-                                                            <SelectItem key={l.id} value={l.id}>{l.code} - {l.name}</SelectItem>
+                                                            <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
                                                         ))}
-                                                    </optgroup>
+                                                    </SelectGroup>
                                                 )}
                                                 {liabilities.length > 0 && (
-                                                    <optgroup label="Liabilities (Loan Repayments)">
+                                                    <SelectGroup>
+                                                        <SelectLabel>Liabilities (Loan Repayments)</SelectLabel>
                                                         {liabilities.map(l => (
-                                                            <SelectItem key={l.id} value={l.id}>{l.name} ({l.code})</SelectItem>
+                                                            <SelectItem key={l.id} value={l.id}>
+                                                                {l.name} {l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
+                                                            </SelectItem>
                                                         ))}
-                                                    </optgroup>
+                                                    </SelectGroup>
                                                 )}
                                             </SelectContent>
                                         </Select>
@@ -162,27 +167,15 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                     </FormItem>
                                 )}
                             />
+                        </div>
 
-                            <FormField
-                                control={form.control}
-                                name="paidTo"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Paid To (Vendor/Person) *</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Vendor name, staff name..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
+                        <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name="narration"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Narration / Description *</FormLabel>
+                                        <FormLabel>Narration / Description</FormLabel>
                                         <FormControl>
                                             <Input placeholder="e.g., Ground booking fee, Refreshments..." {...field} />
                                         </FormControl>

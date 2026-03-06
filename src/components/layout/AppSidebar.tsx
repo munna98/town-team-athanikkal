@@ -1,3 +1,5 @@
+"use client"
+
 import {
     Sidebar,
     SidebarContent,
@@ -13,6 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { signOut } from "next-auth/react"
 import {
     LayoutDashboard,
     Users,
@@ -43,6 +46,7 @@ const accountingNavItems = [
 ]
 
 const settingsNavItems = [
+    { title: "User Access", url: "/admin/settings/users", icon: Users },
     { title: "Bank Accounts", url: "/admin/settings/banks", icon: Landmark },
     { title: "Settings", url: "/admin/settings", icon: Settings },
 ]
@@ -118,7 +122,7 @@ export function AppSidebar() {
             <SidebarFooter className="border-t p-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton onClick={() => console.log("Sign out")}>
+                        <SidebarMenuButton onClick={() => signOut({ callbackUrl: '/login' })}>
                             <LogOut className="text-red-500" />
                             <span className="text-red-500">Log out</span>
                         </SidebarMenuButton>

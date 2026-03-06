@@ -29,7 +29,7 @@ export function LedgerForm({ groups }: { groups: any[] }) {
     const [isLoading, setIsLoading] = useState(false)
 
     const form = useForm<CreateLedgerInput>({
-        resolver: zodResolver(createLedgerSchema),
+        resolver: zodResolver(createLedgerSchema) as any,
         defaultValues: {
             name: "",
             code: "",

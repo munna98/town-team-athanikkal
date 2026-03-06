@@ -27,23 +27,26 @@ export async function submitReceipt(data: z.infer<typeof receiptSchema>) {
 
         // Create journal entry
         // DR: Cash/Bank
-        // CR: incomeLedgerId (which could be an income ledger or a member party ledger)
+        // CR: incomeLedgerId (which could be a member income ledger or a generic income ledger)
         const transaction = await createJournalEntry({
             type: "RECEIPT",
             date: new Date(parsed.date),
             narration: parsed.narration,
             createdById: session.user.id,
             collectedById: parsed.collectedById,
-            memberId: parsed.memberId || undefined,
             lines: [
                 { ledgerId: debitLedger.id, debit: parsed.amount, credit: 0 },
                 { ledgerId: parsed.incomeLedgerId, debit: 0, credit: parsed.amount },
             ]
         })
 
-        // If memberId is present, recalculate status (incase Membership Fee was credited)
-        if (parsed.memberId) {
-            await recalculateMemberStatus(parsed.memberId)
+        // Auto-detect if credited ledger is a member ledger and recalculate status
+        const creditedLedger = await prisma.ledger.findUnique({
+            where: { id: parsed.incomeLedgerId },
+            select: { memberId: true },
+        })
+        if (creditedLedger?.memberId) {
+            await recalculateMemberStatus(creditedLedger.memberId)
         }
 
         revalidatePath("/admin/accounting/receipts")

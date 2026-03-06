@@ -103,7 +103,7 @@ export function JournalForm({ ledgers }: { ledgers: any[] }) {
                                 name="narration"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Master Narration *</FormLabel>
+                                        <FormLabel>Master Narration</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Adjustment entry for..." {...field} />
                                         </FormControl>
@@ -138,7 +138,9 @@ export function JournalForm({ ledgers }: { ledgers: any[] }) {
                                                             </FormControl>
                                                             <SelectContent>
                                                                 {ledgers.map(l => (
-                                                                    <SelectItem key={l.id} value={l.id}>{l.name} ({l.code})</SelectItem>
+                                                                    <SelectItem key={l.id} value={l.id}>
+                                                                        {l.name} {l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
+                                                                    </SelectItem>
                                                                 ))}
                                                             </SelectContent>
                                                         </Select>

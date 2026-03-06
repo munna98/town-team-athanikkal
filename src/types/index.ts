@@ -23,12 +23,10 @@ export type UpdateMemberInput = z.infer<typeof updateMemberSchema>
 // ─── Transaction Schemas ──────────────────────────────────
 export const receiptSchema = z.object({
     date: z.string().min(1, "Date is required"),
-    memberId: z.string().optional(),
-    memberName: z.string().optional(),
     amount: z.number().positive("Amount must be positive"),
     cashOrBank: z.enum(["CASH", "BANK"]),
     incomeLedgerId: z.string().min(1, "Income ledger is required"),
-    narration: z.string().min(1, "Narration is required"),
+    narration: z.string().default(""),
     collectedById: z.string().min(1, "Collected by is required"),
 })
 
@@ -36,11 +34,10 @@ export type ReceiptInput = z.infer<typeof receiptSchema>
 
 export const paymentSchema = z.object({
     date: z.string().min(1, "Date is required"),
-    paidTo: z.string().min(1, "Paid to is required"),
     amount: z.number().positive("Amount must be positive"),
     cashOrBank: z.enum(["CASH", "BANK"]),
     expenseLedgerId: z.string().min(1, "Expense ledger is required"),
-    narration: z.string().min(1, "Narration is required"),
+    narration: z.string().optional(),
 })
 
 export type PaymentInput = z.infer<typeof paymentSchema>
@@ -50,7 +47,7 @@ export const contraSchema = z.object({
     fromLedgerId: z.string().min(1, "Source account is required"),
     toLedgerId: z.string().min(1, "Destination account is required"),
     amount: z.number().positive("Amount must be positive"),
-    narration: z.string().min(1, "Narration is required"),
+    narration: z.string().default(""),
 })
 
 export type ContraInput = z.infer<typeof contraSchema>
@@ -64,7 +61,7 @@ export const journalLineSchema = z.object({
 
 export const journalSchema = z.object({
     date: z.string().min(1, "Date is required"),
-    narration: z.string().min(1, "Narration is required"),
+    narration: z.string().default(""),
     lines: z.array(journalLineSchema).min(2, "At least 2 lines required"),
 })
 

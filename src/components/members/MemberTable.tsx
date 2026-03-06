@@ -29,6 +29,7 @@ export function MemberTable() {
     const [search, setSearch] = useState("")
     const [status, setStatus] = useState("ALL")
     const [isExec, setIsExec] = useState("ALL")
+    const [bloodGroup, setBloodGroup] = useState("ALL")
 
     const fetchMembers = async () => {
         setLoading(true)
@@ -37,6 +38,7 @@ export function MemberTable() {
             if (search) params.append("q", search)
             if (status !== "ALL") params.append("status", status)
             if (isExec !== "ALL") params.append("isExecutive", isExec)
+            if (bloodGroup !== "ALL") params.append("bloodGroup", bloodGroup)
 
             const res = await fetch(`/api/members?${params.toString()}`)
             const data = await res.json()
@@ -54,7 +56,7 @@ export function MemberTable() {
         }, 300)
 
         return () => clearTimeout(delayDebounceFn)
-    }, [search, status, isExec])
+    }, [search, status, isExec, bloodGroup])
 
     return (
         <div className="space-y-4">
@@ -90,6 +92,18 @@ export function MemberTable() {
                             <SelectItem value="ALL">All Roles</SelectItem>
                             <SelectItem value="true">Executive</SelectItem>
                             <SelectItem value="false">Standard</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={bloodGroup} onValueChange={setBloodGroup}>
+                        <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Blood Group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All Blood Groups</SelectItem>
+                            {Object.entries(bloodGroupLabels).map(([key, label]) => (
+                                <SelectItem key={key} value={key}>{label}</SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
                 </div>
