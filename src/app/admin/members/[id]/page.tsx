@@ -9,6 +9,8 @@ import { ArrowLeft, Edit, FileText, Phone, Mail, MapPin, Calendar, Activity, Cre
 import { Progress } from "@/components/ui/progress"
 import { DownloadCardButton, DownloadReceiptButton } from "@/components/pdf/DownloadButtons"
 
+export const dynamic = 'force-dynamic'
+
 export default async function MemberDetailPage({
     params,
 }: {

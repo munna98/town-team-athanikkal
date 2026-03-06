@@ -5,6 +5,8 @@ import { Users, CreditCard, Landmark, TrendingUp, TrendingDown, Award, UserCheck
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
+export const dynamic = 'force-dynamic'
+
 async function getDashboardStats() {
     const [totalMembers, basicMembers, goldMembers, cashLedger, bankLedger, recentTransactions] = await Promise.all([
         prisma.member.count(),

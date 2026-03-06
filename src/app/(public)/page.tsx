@@ -5,6 +5,8 @@ import prisma from "@/lib/prisma"
 import { HeroBackground } from "@/components/landing/HeroBackground"
 import { Trophy, Users, Calendar, ChevronRight, Shield, Droplet } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function LandingPage() {
     const executives = await prisma.member.findMany({
         where: { isExecutive: true },
