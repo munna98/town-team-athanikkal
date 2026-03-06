@@ -1,6 +1,8 @@
 import { JournalForm } from "@/components/accounting/JournalForm"
 import prisma from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
 export default async function JournalPage() {
     const rawLedgers = await prisma.ledger.findMany({
         include: { group: true },

@@ -1,6 +1,8 @@
 import { PaymentForm } from "@/components/accounting/PaymentForm"
 import prisma from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
 export default async function PaymentsPage() {
     const rawLedgers = await prisma.ledger.findMany({
         include: { group: true },

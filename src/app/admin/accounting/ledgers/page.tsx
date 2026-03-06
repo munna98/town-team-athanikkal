@@ -7,6 +7,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { FileText } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 export default async function LedgersPage() {
     const groups = await prisma.ledgerGroup.findMany({
         orderBy: { nature: "asc" }

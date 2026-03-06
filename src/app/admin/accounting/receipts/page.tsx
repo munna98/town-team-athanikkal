@@ -1,6 +1,8 @@
 import { ReceiptForm } from "@/components/accounting/ReceiptForm"
 import prisma from "@/lib/prisma"
 
+export const dynamic = 'force-dynamic'
+
 export default async function ReceiptsPage() {
     const [rawLedgers, rawExecutives] = await Promise.all([
         prisma.ledger.findMany({
