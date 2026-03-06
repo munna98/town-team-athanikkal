@@ -3,6 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { UserManagementClient } from "./UserManagementClient"
 
+export const dynamic = 'force-dynamic'
+
 export default async function UserManagementPage() {
     // Get all executives
     const rawExecutives = await prisma.member.findMany({
