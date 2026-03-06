@@ -26,7 +26,7 @@ export const receiptSchema = z.object({
     amount: z.number().positive("Amount must be positive"),
     cashOrBank: z.enum(["CASH", "BANK"]),
     incomeLedgerId: z.string().min(1, "Income ledger is required"),
-    narration: z.string().default(""),
+    narration: z.string().optional(),
     collectedById: z.string().min(1, "Collected by is required"),
 })
 
@@ -47,7 +47,7 @@ export const contraSchema = z.object({
     fromLedgerId: z.string().min(1, "Source account is required"),
     toLedgerId: z.string().min(1, "Destination account is required"),
     amount: z.number().positive("Amount must be positive"),
-    narration: z.string().default(""),
+    narration: z.string().optional(),
 })
 
 export type ContraInput = z.infer<typeof contraSchema>
@@ -61,7 +61,7 @@ export const journalLineSchema = z.object({
 
 export const journalSchema = z.object({
     date: z.string().min(1, "Date is required"),
-    narration: z.string().default(""),
+    narration: z.string().optional(),
     lines: z.array(journalLineSchema).min(2, "At least 2 lines required"),
 })
 

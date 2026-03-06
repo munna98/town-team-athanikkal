@@ -20,7 +20,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
                     include: { ledger: { include: { group: true, member: true } } },
                 },
                 createdBy: true,
-                createdBy: true,
                 collectedBy: true,
             },
         })

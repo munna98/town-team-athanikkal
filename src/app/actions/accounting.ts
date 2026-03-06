@@ -31,7 +31,7 @@ export async function submitReceipt(data: z.infer<typeof receiptSchema>) {
         const transaction = await createJournalEntry({
             type: "RECEIPT",
             date: new Date(parsed.date),
-            narration: parsed.narration,
+            narration: parsed.narration ?? "",
             createdById: session.user.id,
             collectedById: parsed.collectedById,
             lines: [
@@ -74,7 +74,7 @@ export async function submitPayment(data: z.infer<typeof paymentSchema>) {
         const transaction = await createJournalEntry({
             type: "PAYMENT",
             date: new Date(parsed.date),
-            narration: parsed.narration,
+            narration: parsed.narration ?? "",
             createdById: session.user.id,
             lines: [
                 { ledgerId: parsed.expenseLedgerId, debit: parsed.amount, credit: 0 },
@@ -102,7 +102,7 @@ export async function submitContra(data: z.infer<typeof contraSchema>) {
         const transaction = await createJournalEntry({
             type: "CONTRA",
             date: new Date(parsed.date),
-            narration: parsed.narration,
+            narration: parsed.narration ?? "",
             createdById: session.user.id,
             lines: [
                 { ledgerId: parsed.toLedgerId, debit: parsed.amount, credit: 0 },
@@ -135,7 +135,7 @@ export async function submitJournal(data: z.infer<typeof journalSchema>) {
         const transaction = await createJournalEntry({
             type: "JOURNAL",
             date: new Date(parsed.date),
-            narration: parsed.narration,
+            narration: parsed.narration ?? "",
             createdById: session.user.id,
             lines: parsed.lines
         })
