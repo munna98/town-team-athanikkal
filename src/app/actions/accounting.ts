@@ -43,7 +43,7 @@ export async function submitReceipt(data: z.infer<typeof receiptSchema>) {
         // Auto-detect if credited ledger is a member ledger and recalculate status
         const creditedLedger = await prisma.ledger.findUnique({
             where: { id: parsed.incomeLedgerId },
-            select: { memberId: true },
+            include: { member: { select: { mobile: true } } },
         })
         if (creditedLedger?.memberId) {
             await recalculateMemberStatus(creditedLedger.memberId)
@@ -51,7 +51,12 @@ export async function submitReceipt(data: z.infer<typeof receiptSchema>) {
 
         revalidatePath("/admin/accounting/receipts")
         revalidatePath("/admin/accounting/reports")
-        return { success: true, transactionId: transaction.id }
+        return { 
+            success: true, 
+            transactionId: transaction.id,
+            referenceNo: transaction.referenceNo,
+            mobile: creditedLedger?.member?.mobile || undefined
+        }
     } catch (error: any) {
         return { error: error.message || "Failed to submit receipt" }
     }

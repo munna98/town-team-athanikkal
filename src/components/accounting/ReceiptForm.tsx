@@ -17,7 +17,9 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel
 } from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Loader2, CheckCircle2 } from "lucide-react"
+import { DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
 
 export function ReceiptForm({
     ledgers,
@@ -27,6 +29,7 @@ export function ReceiptForm({
     executives: any[]
 }) {
     const [isLoading, setIsLoading] = useState(false)
+    const [successData, setSuccessData] = useState<{ transactionId: string, referenceNo: string, mobile?: string } | null>(null)
 
     const form = useForm<ReceiptInput>({
         resolver: zodResolver(receiptSchema),
@@ -49,8 +52,13 @@ export function ReceiptForm({
             const result = await submitReceipt(data)
             if (result.error) {
                 toast.error(result.error)
-            } else {
+            } else if (result.transactionId && result.referenceNo) {
                 toast.success("Receipt created successfully")
+                setSuccessData({
+                    transactionId: result.transactionId,
+                    referenceNo: result.referenceNo,
+                    mobile: result.mobile
+                })
                 form.reset({
                     ...form.getValues(),
                     amount: 0,
@@ -62,6 +70,45 @@ export function ReceiptForm({
         } finally {
             setIsLoading(false)
         }
+    }
+
+    if (successData) {
+        return (
+            <Card>
+                <CardContent className="pt-6 flex flex-col items-center justify-center space-y-6 text-center py-12">
+                    <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
+                        <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-800">Receipt Generated</h2>
+                        <p className="text-slate-500 mt-1">Reference No: <span className="font-semibold text-slate-700">{successData.referenceNo}</span></p>
+                    </div>
+
+                    <div className="flex gap-4 mt-6">
+                        <Button variant="outline" className="border-sky-200 text-sky-700 hover:bg-sky-50" asChild>
+                            <div>
+                                <DownloadReceiptButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} />
+                            </div>
+                        </Button>
+                        <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" asChild>
+                            <div>
+                                <ShareReceiptButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} mobile={successData.mobile} />
+                            </div>
+                        </Button>
+                    </div>
+
+                    <div className="pt-4 w-full max-w-xs mx-auto border-t mt-4">
+                        <Button 
+                            variant="default" 
+                            className="w-full bg-slate-800 hover:bg-slate-900" 
+                            onClick={() => setSuccessData(null)}
+                        >
+                            Create Another Receipt
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        )
     }
 
     return (

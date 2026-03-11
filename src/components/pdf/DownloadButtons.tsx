@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Download, Loader2 } from "lucide-react"
+import { Download, Loader2, Share2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -86,6 +86,67 @@ export function DownloadReceiptButton({ transactionId, referenceNo }: { transact
         >
             {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-1" />}
             PDF
+        </Button>
+    )
+}
+
+export function ShareReceiptButton({ transactionId, referenceNo, mobile }: { transactionId: string; referenceNo: string; mobile?: string | null }) {
+    const [loading, setLoading] = useState(false)
+
+    async function handleShare() {
+        setLoading(true)
+        try {
+            const res = await fetch(`/api/pdf/receipt/${transactionId}`)
+            if (!res.ok) {
+                const data = await res.json()
+                toast.error(data.error || "Failed to generate receipt for sharing")
+                return
+            }
+            const blob = await res.blob()
+            const file = new File([blob], `receipt-${referenceNo}.pdf`, { type: "application/pdf" })
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: `Receipt ${referenceNo}`,
+                    text: `Here is your receipt ${referenceNo}`,
+                    files: [file]
+                })
+                toast.success("Receipt shared!")
+            } else {
+                // Fallback to WhatsApp text link without file
+                const text = encodeURIComponent(`Here is your receipt reference number: ${referenceNo}. Please contact us if you need the PDF copy.`)
+                let waUrl = `https://wa.me/?text=${text}`
+                
+                if (mobile) {
+                    const cleanMobile = mobile.replace(/\D/g, '')
+                    // Assuming India by default if 10 digits
+                    const finalMobile = cleanMobile.length === 10 ? `91${cleanMobile}` : cleanMobile
+                    waUrl = `https://wa.me/${finalMobile}?text=${text}`
+                }
+                
+                window.open(waUrl, '_blank')
+                toast.success("Opened WhatsApp (file sharing not supported)")
+            }
+        } catch (error: any) {
+            // share API sometimes throws AbortError when user intentionally cancels
+            if (error.name !== 'AbortError') {
+                toast.error("Failed to share receipt")
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    return (
+        <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+            onClick={handleShare}
+            disabled={loading}
+        >
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Share2 className="h-3 w-3 mr-1" />}
+            WhatsApp
         </Button>
     )
 }

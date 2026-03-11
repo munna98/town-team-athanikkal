@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate, bloodGroupLabels, membershipStatusConfig } from "@/lib/utils"
 import { ArrowLeft, Edit, FileText, Phone, Mail, MapPin, Calendar, Activity, CreditCard } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
-import { DownloadCardButton, DownloadReceiptButton } from "@/components/pdf/DownloadButtons"
+import { DownloadCardButton, DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
 
 export const dynamic = 'force-dynamic'
 
@@ -242,7 +242,10 @@ export default async function MemberDetailPage({
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <div className="font-bold text-sky-600">{formatCurrency(Number(txn.totalAmount))}</div>
-                                                <DownloadReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} />
+                                                <div className="flex items-center">
+                                                    <DownloadReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} />
+                                                    <ShareReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={member.mobile} />
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
