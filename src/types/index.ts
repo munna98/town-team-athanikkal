@@ -12,6 +12,7 @@ export const createMemberSchema = z.object({
     dob: z.string().min(1, "Date of birth is required"),
     bloodGroup: z.enum(["A_POS", "A_NEG", "B_POS", "B_NEG", "O_POS", "O_NEG", "AB_POS", "AB_NEG"]),
     isExecutive: z.boolean().default(false),
+    position: z.string().optional(),
     photoUrl: z.string().optional().default(""),
 })
 

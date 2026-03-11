@@ -95,7 +95,7 @@ export default async function MemberDetailPage({
                             {member.name}
                             {member.isExecutive && (
                                 <Badge variant="outline" className="border-sky-500 text-sky-600 uppercase text-[10px] tracking-wider font-bold">
-                                    Executive
+                                    Executive {member.position ? `- ${member.position}` : ''}
                                 </Badge>
                             )}
                         </h1>

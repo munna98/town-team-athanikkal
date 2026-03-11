@@ -85,6 +85,7 @@ model Member {
   bloodGroup       BloodGroup
   photoUrl         String?
   isExecutive      Boolean          @default(false)
+  position         String?
   membershipStatus MembershipStatus @default(PENDING)
   totalPaid        Decimal          @default(0) @db.Decimal(12, 2)
   createdAt        DateTime         @default(now())

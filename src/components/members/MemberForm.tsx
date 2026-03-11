@@ -56,6 +56,7 @@ export function MemberForm({
             dob: initialData?.dob ? new Date(initialData.dob).toISOString().split('T')[0] : "",
             bloodGroup: initialData?.bloodGroup || "O_POS",
             isExecutive: initialData?.isExecutive || false,
+            position: initialData?.position || "",
             photoUrl: initialData?.photoUrl || "",
         },
     })
@@ -199,7 +200,7 @@ export function MemberForm({
 
                             {/* Uploadthing photo upload would go here. Skipped for now per request. */}
 
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-2 space-y-4">
                                 <FormField
                                     control={form.control}
                                     name="isExecutive"
@@ -215,6 +216,21 @@ export function MemberForm({
                                         </FormItem>
                                     )}
                                 />
+                                {form.watch("isExecutive") && (
+                                    <FormField
+                                        control={form.control}
+                                        name="position"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Executive Position (e.g. Secretary, President)</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Enter position" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
                             </div>
 
                             <div className="md:col-span-2 border-t pt-4">

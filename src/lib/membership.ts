@@ -43,6 +43,7 @@ export async function createMemberWithLedger(data: CreateMemberInput) {
                 dob: new Date(data.dob),
                 bloodGroup: data.bloodGroup,
                 isExecutive: data.isExecutive,
+                position: data.position || null,
                 photoUrl: data.photoUrl || null,
             },
         })
