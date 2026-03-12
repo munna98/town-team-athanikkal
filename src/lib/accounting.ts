@@ -161,6 +161,21 @@ export async function getLedgerStatement(ledgerId: string, from?: Date, to?: Dat
 
     const dateFilter = from && to ? { date: { gte: from, lte: to } } : {}
 
+    // 1. Calculate balance up to 'from' date (if provided)
+    let openingFromDate = 0
+    if (from) {
+        const preResult = await prisma.transactionLine.aggregate({
+            where: {
+                ledgerId,
+                transaction: { date: { lt: from } }
+            },
+            _sum: { debit: true, credit: true }
+        })
+        const preDebit = Number(preResult._sum.debit || 0)
+        const preCredit = Number(preResult._sum.credit || 0)
+        openingFromDate = preDebit - preCredit
+    }
+
     const lines = await prisma.transactionLine.findMany({
         where: {
             ledgerId,
@@ -169,14 +184,20 @@ export async function getLedgerStatement(ledgerId: string, from?: Date, to?: Dat
         include: {
             transaction: true,
         },
-        orderBy: {
-            transaction: { date: "asc" },
-        },
+        orderBy: [
+            { transaction: { date: "asc" } },
+            { transaction: { createdAt: "asc" } } // Secondary sort for same-day priority
+        ],
     })
 
-    const isDebitNature = ["ASSET", "EXPENSE"].includes(ledger.group.nature)
-    const opening = Number(ledger.openingBalance)
-    let runningBalance = ledger.openingType === "DR" ? opening : -opening
+    const openingVal = Number(ledger.openingBalance)
+    const openingTypeSign = ledger.openingType === "DR" ? 1 : -1
+    
+    // Initial balance = Ledger Opening + Transactions before 'from'
+    let runningBalance = (openingVal * openingTypeSign) + openingFromDate
+
+    // The 'openingBalance' displayed in the report should be this runningBalance
+    const initialBalanceForReport = runningBalance
 
     const statement = lines.map((line) => {
         const debit = Number(line.debit)
@@ -201,8 +222,8 @@ export async function getLedgerStatement(ledgerId: string, from?: Date, to?: Dat
             groupName: ledger.group.name,
             nature: ledger.group.nature,
         },
-        openingBalance: opening,
-        openingType: ledger.openingType,
+        openingBalance: Math.abs(initialBalanceForReport),
+        openingType: initialBalanceForReport >= 0 ? "DR" : "CR",
         statement,
         closingBalance: runningBalance,
     }

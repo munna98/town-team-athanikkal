@@ -11,10 +11,15 @@ import {
     SidebarGroup,
     SidebarGroupLabel,
     SidebarGroupContent,
+    SidebarMenuSub,
+    SidebarMenuSubItem,
+    SidebarMenuSubButton,
     useSidebar,
 } from "@/components/ui/sidebar"
+import * as React from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
 import {
     LayoutDashboard,
@@ -43,7 +48,17 @@ const accountingNavItems = [
     { title: "Contra", url: "/admin/accounting/contra", icon: ArrowRightLeft },
     { title: "Journal", url: "/admin/accounting/journal", icon: BookOpen },
     { title: "Ledgers", url: "/admin/accounting/ledgers", icon: Library },
-    { title: "Reports", url: "/admin/accounting/reports", icon: PieChart },
+    { 
+        title: "Reports", 
+        url: "/admin/accounting/reports", 
+        icon: PieChart,
+        items: [
+            { title: "Trial Balance", url: "/admin/accounting/reports?type=trial-balance" },
+            { title: "Ledger Statement", url: "/admin/accounting/reports?type=ledger-statement" },
+            { title: "Income & Expenditure", url: "/admin/accounting/reports?type=income" },
+            { title: "Balance Sheet", url: "/admin/accounting/reports?type=balance-sheet" },
+        ]
+    },
 ]
 
 const settingsNavItems = [
@@ -55,8 +70,12 @@ const settingsNavItems = [
 
 export function AppSidebar() {
     const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const currentType = searchParams.get("type") || "trial-balance"
     const { data: session } = useSession()
     const currentUserRole = session?.user?.role
+    const { setOpenMobile, isMobile } = useSidebar()
+    const [reportsOpen, setReportsOpen] = useState(pathname.startsWith("/admin/accounting/reports"))
 
     const filteredSettingsNavItems = settingsNavItems.filter(item => {
         if (item.title === "User Access") {
@@ -82,7 +101,11 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {adminNavItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={pathname === item.url}>
+                                    <SidebarMenuButton 
+                                        asChild 
+                                        isActive={pathname === item.url}
+                                        onClick={() => isMobile && setOpenMobile(false)}
+                                    >
                                         <Link href={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>
@@ -100,12 +123,52 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {accountingNavItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={pathname.startsWith(item.url)}>
-                                        <Link href={item.url}>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
+                                    {item.items ? (
+                                        <>
+                                            <SidebarMenuButton
+                                                onClick={() => setReportsOpen(!reportsOpen)}
+                                                isActive={pathname.startsWith(item.url)}
+                                            >
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                                <ChevronRight className={`ml-auto h-4 w-4 transition-transform duration-200 ${reportsOpen ? "rotate-90" : ""}`} />
+                                            </SidebarMenuButton>
+                                            {reportsOpen && (
+                                                <SidebarMenuSub className="transition-all duration-200">
+                                                    {item.items.map((subItem) => {
+                                                        const subItemUrl = new URL(subItem.url, "http://localhost")
+                                                        const subItemType = subItemUrl.searchParams.get("type")
+                                                        const isActive = pathname === subItemUrl.pathname && currentType === subItemType
+
+                                                        return (
+                                                            <SidebarMenuSubItem key={subItem.title}>
+                                                                <SidebarMenuSubButton 
+                                                                    asChild 
+                                                                    isActive={isActive}
+                                                                    onClick={() => isMobile && setOpenMobile(false)}
+                                                                >
+                                                                    <Link href={subItem.url}>
+                                                                        <span>{subItem.title}</span>
+                                                                    </Link>
+                                                                </SidebarMenuSubButton>
+                                                            </SidebarMenuSubItem>
+                                                        )
+                                                    })}
+                                                </SidebarMenuSub>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <SidebarMenuButton 
+                                            asChild 
+                                            isActive={pathname.startsWith(item.url)}
+                                            onClick={() => isMobile && setOpenMobile(false)}
+                                        >
+                                            <Link href={item.url}>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    )}
                                 </SidebarMenuItem>
                             ))}
                         </SidebarMenu>
@@ -118,7 +181,11 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {filteredSettingsNavItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={pathname === item.url}>
+                                    <SidebarMenuButton 
+                                        asChild 
+                                        isActive={pathname === item.url}
+                                        onClick={() => isMobile && setOpenMobile(false)}
+                                    >
                                         <Link href={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>

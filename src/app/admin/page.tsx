@@ -8,10 +8,23 @@ import { Button } from "@/components/ui/button"
 export const dynamic = 'force-dynamic'
 
 async function getDashboardStats() {
-    const [totalMembers, basicMembers, goldMembers, cashLedger, bankLedger, recentTransactions] = await Promise.all([
+    const [
+        totalMembers,
+        pendingMembers,
+        basicMembers,
+        silverMembers,
+        goldMembers,
+        platinumMembers,
+        cashLedger,
+        bankLedger,
+        recentTransactions
+    ] = await Promise.all([
         prisma.member.count(),
+        prisma.member.count({ where: { membershipStatus: "PENDING" } }),
         prisma.member.count({ where: { membershipStatus: "BASIC" } }),
+        prisma.member.count({ where: { membershipStatus: "SILVER" } }),
         prisma.member.count({ where: { membershipStatus: "GOLD" } }),
+        prisma.member.count({ where: { membershipStatus: "PLATINUM" } }),
         prisma.ledger.findUnique({ where: { code: "1001" } }),
         prisma.ledger.findUnique({ where: { code: "1002" } }),
         prisma.transaction.findMany({
@@ -60,8 +73,11 @@ async function getDashboardStats() {
 
     return {
         totalMembers,
+        pendingMembers,
         basicMembers,
+        silverMembers,
         goldMembers,
+        platinumMembers,
         cashBalance,
         bankBalance,
         monthIncome: Number(monthIncome._sum.credit || 0),
@@ -74,9 +90,12 @@ export default async function AdminDashboard() {
     const stats = await getDashboardStats()
 
     const cards = [
-        { title: "Total Members", value: stats.totalMembers.toString(), icon: Users, color: "text-sky-600", bg: "bg-sky-50" },
-        { title: "Basic Members", value: stats.basicMembers.toString(), icon: UserCheck, color: "text-blue-600", bg: "bg-blue-50" },
-        { title: "Gold Members", value: stats.goldMembers.toString(), icon: Award, color: "text-amber-600", bg: "bg-amber-50" },
+        { title: "Total Members", value: stats.totalMembers.toString(), icon: Users, color: "text-slate-600", bg: "bg-slate-50" },
+        { title: "Pending", value: stats.pendingMembers.toString(), icon: UserCheck, color: "text-amber-600", bg: "bg-amber-50" },
+        { title: "Basic", value: stats.basicMembers.toString(), icon: UserCheck, color: "text-blue-600", bg: "bg-blue-50" },
+        { title: "Silver", value: stats.silverMembers.toString(), icon: Award, color: "text-slate-400", bg: "bg-slate-50" },
+        { title: "Gold", value: stats.goldMembers.toString(), icon: Award, color: "text-amber-500", bg: "bg-amber-50" },
+        { title: "Platinum", value: stats.platinumMembers.toString(), icon: Award, color: "text-indigo-600", bg: "bg-indigo-50" },
         { title: "Cash Balance", value: formatCurrency(stats.cashBalance), icon: CreditCard, color: "text-emerald-600", bg: "bg-emerald-50" },
         { title: "Bank Balance", value: formatCurrency(stats.bankBalance), icon: Landmark, color: "text-violet-600", bg: "bg-violet-50" },
         { title: "Month Income", value: formatCurrency(stats.monthIncome), icon: TrendingUp, color: "text-green-600", bg: "bg-green-50" },
@@ -91,15 +110,17 @@ export default async function AdminDashboard() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-4">
                 {cards.map((card) => (
-                    <Card key={card.title} className="shadow-sm">
-                        <CardContent className="p-4">
-                            <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center mb-3`}>
-                                <card.icon className={`h-5 w-5 ${card.color}`} />
+                    <Card key={card.title} className="shadow-sm hover:shadow-md transition-shadow">
+                        <CardContent className="p-2 flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg ${card.bg} flex items-center justify-center shrink-0`}>
+                                <card.icon className={`h-4 w-4 ${card.color}`} />
                             </div>
-                            <div className="text-xl font-bold text-slate-800">{card.value}</div>
-                            <div className="text-xs text-slate-500 mt-1">{card.title}</div>
+                            <div className="min-w-0">
+                                <div className="text-lg font-bold text-slate-800 leading-tight truncate">{card.value}</div>
+                                <div className="text-[9px] font-medium text-slate-500 uppercase tracking-tighter truncate">{card.title}</div>
+                            </div>
                         </CardContent>
                     </Card>
                 ))}
