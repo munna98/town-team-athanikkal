@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { UserManagementClient } from "./UserManagementClient"
@@ -6,6 +7,9 @@ import { UserManagementClient } from "./UserManagementClient"
 export const dynamic = 'force-dynamic'
 
 export default async function UserManagementPage() {
+    const session = await auth()
+    const currentUserRole = session?.user?.role as string
+
     // Get all executives
     const rawExecutives = await prisma.member.findMany({
         where: { isExecutive: true },
@@ -52,7 +56,7 @@ export default async function UserManagementPage() {
                         <CardTitle className="text-lg">Executive Members</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <UserManagementClient executives={executives} />
+                        <UserManagementClient executives={executives} currentUserRole={currentUserRole} />
                     </CardContent>
                 </Card>
             </div>

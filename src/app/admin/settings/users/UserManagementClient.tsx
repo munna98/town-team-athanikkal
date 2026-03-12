@@ -15,8 +15,9 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
-export function UserManagementClient({ executives }: { executives: any[] }) {
+export function UserManagementClient({ executives, currentUserRole }: { executives: any[], currentUserRole: string }) {
     const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({})
+    const isSuperAdmin = currentUserRole === "SUPER_ADMIN"
 
     const wrapAction = async (id: string, actionFn: () => Promise<{ error?: string, success?: boolean, message?: string }>, successMsg?: string) => {
         setLoadingIds(prev => ({ ...prev, [id]: true }))
@@ -81,9 +82,9 @@ export function UserManagementClient({ executives }: { executives: any[] }) {
                                             variant="outline"
                                             size="sm"
                                             className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                                            disabled={loadingIds[member.id]}
+                                            disabled={loadingIds[member.id] || !isSuperAdmin}
                                             onClick={() => wrapAction(member.id, () => revokeUserAccess(member.user.id), "Access revoked")}
-                                            title="Revoke Access"
+                                            title={isSuperAdmin ? "Revoke Access" : "Only super users can revoke access"}
                                         >
                                             {loadingIds[member.id] ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
                                         </Button>

@@ -28,7 +28,8 @@ import {
     Settings,
     LogOut,
     ChevronRight,
-    Landmark
+    Landmark,
+    KeyRound
 } from "lucide-react"
 
 const adminNavItems = [
@@ -48,6 +49,7 @@ const accountingNavItems = [
 const settingsNavItems = [
     { title: "User Access", url: "/admin/settings/users", icon: Users },
     { title: "Bank Accounts", url: "/admin/settings/banks", icon: Landmark },
+    { title: "Change Password", url: "/admin/settings/password", icon: KeyRound },
     { title: "Settings", url: "/admin/settings", icon: Settings },
 ]
 
