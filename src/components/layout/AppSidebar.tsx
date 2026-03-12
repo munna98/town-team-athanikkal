@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { signOut } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import {
     LayoutDashboard,
     Users,
@@ -55,6 +55,15 @@ const settingsNavItems = [
 
 export function AppSidebar() {
     const pathname = usePathname()
+    const { data: session } = useSession()
+    const currentUserRole = session?.user?.role
+
+    const filteredSettingsNavItems = settingsNavItems.filter(item => {
+        if (item.title === "User Access") {
+            return currentUserRole === "SUPER_ADMIN"
+        }
+        return true
+    })
 
     return (
         <Sidebar>
@@ -107,7 +116,7 @@ export function AppSidebar() {
                     <SidebarGroupLabel>System</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {settingsNavItems.map((item) => (
+                            {filteredSettingsNavItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild isActive={pathname === item.url}>
                                         <Link href={item.url}>
