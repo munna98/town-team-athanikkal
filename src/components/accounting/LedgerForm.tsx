@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { createLedgerSchema, CreateLedgerInput } from "@/types"
 import { toast } from "sonner"
-import { submitLedger } from "@/app/actions/ledgers"
+import { submitLedger, getNextLedgerCode } from "@/app/actions/ledgers"
 import {
     Dialog,
     DialogContent,
@@ -39,6 +39,25 @@ export function LedgerForm({ groups }: { groups: any[] }) {
             openingType: "DR",
         },
     })
+
+    const selectedGroupId = form.watch("groupId")
+
+    useEffect(() => {
+        async function fetchNextCode() {
+            if (!selectedGroupId) return
+            
+            try {
+                const result = await getNextLedgerCode(selectedGroupId)
+                if (result.code) {
+                    form.setValue("code", result.code)
+                }
+            } catch (error) {
+                console.error("Failed to fetch next code:", error)
+            }
+        }
+        
+        fetchNextCode()
+    }, [selectedGroupId, form])
 
     async function onSubmit(data: CreateLedgerInput) {
         setIsLoading(true)
@@ -90,20 +109,6 @@ export function LedgerForm({ groups }: { groups: any[] }) {
 
                         <FormField
                             control={form.control}
-                            name="code"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Unique Code *</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g. 5205" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
                             name="groupId"
                             render={({ field }) => (
                                 <FormItem>
@@ -120,6 +125,20 @@ export function LedgerForm({ groups }: { groups: any[] }) {
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="code"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Unique Code *</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g. 5205" {...field} />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
