@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { createJournalEntry } from "@/lib/accounting"
 import { recalculateMemberStatus } from "@/lib/membership"
+import { Decimal } from "@prisma/client/runtime/library"
 import {
     receiptSchema,
     paymentSchema,
@@ -150,5 +151,249 @@ export async function submitJournal(data: z.infer<typeof journalSchema>) {
         return { success: true, transactionId: transaction.id }
     } catch (error: any) {
         return { error: error.message || "Failed to submit journal" }
+    }
+}
+
+// ─── List Transactions (paginated) ───────────────────────────────────────────
+
+export async function getTransactions({
+    type,
+    page = 1,
+    search = "",
+    pageSize = 15,
+}: {
+    type: "RECEIPT" | "PAYMENT" | "CONTRA" | "JOURNAL"
+    page?: number
+    search?: string
+    pageSize?: number
+}) {
+    const session = await auth()
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const skip = (page - 1) * pageSize
+    const where: any = {
+        type,
+        ...(search ? {
+            OR: [
+                { referenceNo: { contains: search, mode: "insensitive" } },
+                { narration: { contains: search, mode: "insensitive" } },
+            ]
+        } : {})
+    }
+
+    const [transactions, total] = await Promise.all([
+        prisma.transaction.findMany({
+            where,
+            include: {
+                lines: {
+                    include: { ledger: { select: { id: true, name: true, code: true } } }
+                },
+                collectedBy: { select: { id: true, name: true } },
+                createdBy: { select: { id: true, email: true } },
+                updatedBy: { select: { id: true, email: true } },
+            },
+            orderBy: { date: "desc" },
+            skip,
+            take: pageSize,
+        }),
+        prisma.transaction.count({ where }),
+    ])
+
+    return {
+        transactions: JSON.parse(JSON.stringify(transactions)),
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+    }
+}
+
+// ─── Get Single Transaction ───────────────────────────────────────────────────
+
+export async function getTransactionById(id: string) {
+    const session = await auth()
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const transaction = await prisma.transaction.findUnique({
+        where: { id },
+        include: {
+            lines: {
+                include: { ledger: { select: { id: true, name: true, code: true } } }
+            },
+            collectedBy: { select: { id: true, name: true } },
+            createdBy: { select: { id: true, email: true } },
+            updatedBy: { select: { id: true, email: true } },
+        },
+    })
+    if (!transaction) throw new Error("Transaction not found")
+    return JSON.parse(JSON.stringify(transaction))
+}
+
+// ─── Update Receipt ───────────────────────────────────────────────────────────
+
+export async function updateReceipt(id: string, data: z.infer<typeof receiptSchema>) {
+    const session = await auth()
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    try {
+        const parsed = receiptSchema.parse(data)
+
+        const debitLedgerCode = parsed.cashOrBank === "CASH" ? "1001" : "1002"
+        const debitLedger = await prisma.ledger.findUnique({ where: { code: debitLedgerCode } })
+        if (!debitLedger) throw new Error(`${parsed.cashOrBank} ledger not found`)
+
+
+        await prisma.$transaction(async (tx) => {
+            await tx.transactionLine.deleteMany({ where: { transactionId: id } })
+            await tx.transaction.update({
+                where: { id },
+                data: {
+                    date: new Date(parsed.date),
+                    narration: parsed.narration ?? "",
+                    totalAmount: new Decimal(parsed.amount),
+                    collectedById: parsed.collectedById || null,
+                    updatedById: session.user.id,
+                    lines: {
+                        create: [
+                            { ledgerId: debitLedger.id, debit: new Decimal(parsed.amount), credit: new Decimal(0) },
+                            { ledgerId: parsed.incomeLedgerId, debit: new Decimal(0), credit: new Decimal(parsed.amount) },
+                        ]
+                    }
+                }
+            })
+        })
+
+        const creditedLedger = await prisma.ledger.findUnique({ where: { id: parsed.incomeLedgerId } })
+        if (creditedLedger?.memberId) {
+            await recalculateMemberStatus(creditedLedger.memberId)
+        }
+
+        revalidatePath("/admin/accounting/receipts")
+        revalidatePath("/admin/accounting/reports")
+        return { success: true }
+    } catch (error: any) {
+        return { error: error.message || "Failed to update receipt" }
+    }
+}
+
+// ─── Update Payment ───────────────────────────────────────────────────────────
+
+export async function updatePayment(id: string, data: z.infer<typeof paymentSchema>) {
+    const session = await auth()
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    try {
+        const parsed = paymentSchema.parse(data)
+
+        const creditLedgerCode = parsed.cashOrBank === "CASH" ? "1001" : "1002"
+        const creditLedger = await prisma.ledger.findUnique({ where: { code: creditLedgerCode } })
+        if (!creditLedger) throw new Error(`${parsed.cashOrBank} ledger not found`)
+
+
+        await prisma.$transaction(async (tx) => {
+            await tx.transactionLine.deleteMany({ where: { transactionId: id } })
+            await tx.transaction.update({
+                where: { id },
+                data: {
+                    date: new Date(parsed.date),
+                    narration: parsed.narration ?? "",
+                    totalAmount: new Decimal(parsed.amount),
+                    updatedById: session.user.id,
+                    lines: {
+                        create: [
+                            { ledgerId: parsed.expenseLedgerId, debit: new Decimal(parsed.amount), credit: new Decimal(0) },
+                            { ledgerId: creditLedger.id, debit: new Decimal(0), credit: new Decimal(parsed.amount) },
+                        ]
+                    }
+                }
+            })
+        })
+
+        revalidatePath("/admin/accounting/payments")
+        revalidatePath("/admin/accounting/reports")
+        return { success: true }
+    } catch (error: any) {
+        return { error: error.message || "Failed to update payment" }
+    }
+}
+
+// ─── Update Contra ────────────────────────────────────────────────────────────
+
+export async function updateContra(id: string, data: z.infer<typeof contraSchema>) {
+    const session = await auth()
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    try {
+        const parsed = contraSchema.parse(data)
+
+        await prisma.$transaction(async (tx) => {
+            await tx.transactionLine.deleteMany({ where: { transactionId: id } })
+            await tx.transaction.update({
+                where: { id },
+                data: {
+                    date: new Date(parsed.date),
+                    narration: parsed.narration ?? "",
+                    totalAmount: new Decimal(parsed.amount),
+                    updatedById: session.user.id,
+                    lines: {
+                        create: [
+                            { ledgerId: parsed.toLedgerId, debit: new Decimal(parsed.amount), credit: new Decimal(0) },
+                            { ledgerId: parsed.fromLedgerId, debit: new Decimal(0), credit: new Decimal(parsed.amount) },
+                        ]
+                    }
+                }
+            })
+        })
+
+        revalidatePath("/admin/accounting/contra")
+        revalidatePath("/admin/accounting/reports")
+        return { success: true }
+    } catch (error: any) {
+        return { error: error.message || "Failed to update contra" }
+    }
+}
+
+// ─── Update Journal ───────────────────────────────────────────────────────────
+
+export async function updateJournal(id: string, data: z.infer<typeof journalSchema>) {
+    const session = await auth()
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    try {
+        const parsed = journalSchema.parse(data)
+
+        const totalDebit = parsed.lines.reduce((acc, l) => acc + l.debit, 0)
+        const totalCredit = parsed.lines.reduce((acc, l) => acc + l.credit, 0)
+        if (Math.abs(totalDebit - totalCredit) > 0.01) {
+            throw new Error("Debits and Credits must be equal")
+        }
+
+
+        await prisma.$transaction(async (tx) => {
+            await tx.transactionLine.deleteMany({ where: { transactionId: id } })
+            await tx.transaction.update({
+                where: { id },
+                data: {
+                    date: new Date(parsed.date),
+                    narration: parsed.narration ?? "",
+                    totalAmount: new Decimal(totalDebit),
+                    updatedById: session.user.id,
+                    lines: {
+                        create: parsed.lines.map(l => ({
+                            ledgerId: l.ledgerId,
+                            debit: new Decimal(l.debit),
+                            credit: new Decimal(l.credit),
+                            description: l.description || null,
+                        }))
+                    }
+                }
+            })
+        })
+
+        revalidatePath("/admin/accounting/journal")
+        revalidatePath("/admin/accounting/reports")
+        return { success: true }
+    } catch (error: any) {
+        return { error: error.message || "Failed to update journal" }
     }
 }

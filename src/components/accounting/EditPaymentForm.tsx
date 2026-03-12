@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { paymentSchema, PaymentInput } from "@/types"
 import { toast } from "sonner"
-import { submitPayment } from "@/app/actions/accounting"
+import { updatePayment } from "@/app/actions/accounting"
+import { useState } from "react"
 import {
     Card, CardHeader, CardTitle, CardDescription, CardContent
 } from "@/components/ui/card"
@@ -17,25 +18,25 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel
 } from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
+import { Loader2, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
-export function PaymentForm({ ledgers }: { ledgers: any[] }) {
+export function EditPaymentForm({
+    transactionId,
+    defaultValues,
+    ledgers,
+}: {
+    transactionId: string
+    defaultValues: PaymentInput
+    ledgers: any[]
+}) {
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
 
     const form = useForm<PaymentInput>({
         resolver: zodResolver(paymentSchema),
-        defaultValues: {
-            date: new Date().toISOString().split('T')[0],
-            amount: 0,
-            cashOrBank: "CASH",
-            expenseLedgerId: "",
-            narration: "",
-        },
+        defaultValues,
     })
-
-    // Expense ledgers and Party ledgers
-    const expenseLedgers = ledgers.filter(l => l.group.nature === "EXPENSE" || l.group.nature === "ASSET" || l.group.nature === "LIABILITY")
-    // For payment, we can pay expenses, or settle liabilities, or give advances (to members)
 
     const pureExpense = ledgers.filter(l => l.group.nature === "EXPENSE")
     const partyLedgers = ledgers.filter(l => l.partyType === "MEMBER")
@@ -44,18 +45,15 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
     async function onSubmit(data: PaymentInput) {
         setIsLoading(true)
         try {
-            const result = await submitPayment(data)
+            const result = await updatePayment(transactionId, data)
             if (result.error) {
                 toast.error(result.error)
             } else {
-                toast.success("Payment recorded successfully")
-                form.reset({
-                    ...form.getValues(),
-                    amount: 0,
-                    narration: "",
-                })
+                toast.success("Payment updated successfully")
+                router.push("/admin/accounting/payments?tab=all")
+                router.refresh()
             }
-        } catch (error) {
+        } catch {
             toast.error("Internal error")
         } finally {
             setIsLoading(false)
@@ -65,8 +63,17 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Record Payment</CardTitle>
-                <CardDescription>Record money paid out from Cash or Bank accounts.</CardDescription>
+                <div className="flex items-center gap-3">
+                    <Link href="/admin/accounting/payments">
+                        <Button variant="outline" size="icon">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                    </Link>
+                    <div>
+                        <CardTitle>Edit Payment</CardTitle>
+                        <CardDescription>Update payment voucher details.</CardDescription>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -131,7 +138,7 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                                 </SelectGroup>
                                                 {partyLedgers.length > 0 && (
                                                     <SelectGroup>
-                                                        <SelectLabel>Party Ledgers (Advances/Settlements)</SelectLabel>
+                                                        <SelectLabel>Party Ledgers</SelectLabel>
                                                         {partyLedgers.map(l => (
                                                             <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
                                                         ))}
@@ -139,7 +146,7 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                                 )}
                                                 {liabilities.length > 0 && (
                                                     <SelectGroup>
-                                                        <SelectLabel>Liabilities (Loan Repayments)</SelectLabel>
+                                                        <SelectLabel>Liabilities</SelectLabel>
                                                         {liabilities.map(l => (
                                                             <SelectItem key={l.id} value={l.id}>
                                                                 {l.name} {l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
@@ -167,6 +174,7 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                     </FormItem>
                                 )}
                             />
+
                             <div className="md:col-span-2">
                                 <FormField
                                     control={form.control}
@@ -175,7 +183,7 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                         <FormItem>
                                             <FormLabel>Narration / Description</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="e.g., Ground booking fee, Refreshments..." {...field} />
+                                                <Input placeholder="e.g., Ground booking fee..." {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -184,10 +192,13 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                             </div>
                         </div>
 
-                        <div className="flex justify-end pt-4">
-                            <Button type="submit" className="bg-sky-600 hover:bg-sky-700 w-full md:w-auto" disabled={isLoading}>
+                        <div className="flex justify-end gap-3 pt-4">
+                            <Link href="/admin/accounting/payments">
+                                <Button type="button" variant="outline">Cancel</Button>
+                            </Link>
+                            <Button type="submit" className="bg-sky-600 hover:bg-sky-700" disabled={isLoading}>
                                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Submit Payment Voucher
+                                Save Changes
                             </Button>
                         </div>
                     </form>

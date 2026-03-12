@@ -3,17 +3,30 @@ import { DrCr, MembershipStatus } from "@prisma/client"
 import { CreateMemberInput } from "@/types"
 
 /**
- * Auto-generate next membership code: TTA-001, TTA-002, ...
+ * Auto-generate next membership code(s).
  */
-export async function generateMembershipCode(): Promise<string> {
+export async function generateMembershipCodes(count: number = 1): Promise<string[]> {
     const last = await prisma.member.findFirst({
         orderBy: { createdAt: "desc" },
         select: { membershipCode: true },
     })
-    if (!last) return "TTA-001"
-    const lastNumber = parseInt(last.membershipCode.split("-")[1])
-    const next = String(lastNumber + 1).padStart(3, "0")
-    return `TTA-${next}`
+    
+    let lastNumber = 0
+    if (last) {
+        lastNumber = parseInt(last.membershipCode.split("-")[1])
+    }
+
+    const codes = []
+    for (let i = 1; i <= count; i++) {
+        const next = String(lastNumber + i).padStart(3, "0")
+        codes.push(`TTA-${next}`)
+    }
+    return codes
+}
+
+export async function generateMembershipCode(): Promise<string> {
+    const codes = await generateMembershipCodes(1)
+    return codes[0]
 }
 
 /**
@@ -67,6 +80,64 @@ export async function createMemberWithLedger(data: CreateMemberInput) {
 }
 
 /**
+ * Bulk create members with their respective ledgers.
+ */
+export async function bulkCreateMembers(dataArray: CreateMemberInput[]) {
+    const group = await prisma.ledgerGroup.findUnique({
+        where: { name: "Membership Income" },
+    })
+    if (!group) throw new Error("Membership Income ledger group not found. Run seed first.")
+
+    const codes = await generateMembershipCodes(dataArray.length)
+
+    return await prisma.$transaction(async (tx) => {
+        const results = []
+
+        for (let i = 0; i < dataArray.length; i++) {
+            const data = dataArray[i]
+            const membershipCode = codes[i]
+
+            // 1. Create the member
+            const member = await tx.member.create({
+                data: {
+                    membershipCode,
+                    name: data.name,
+                    address1: data.address1,
+                    address2: data.address2 || null,
+                    address3: data.address3 || null,
+                    aadhaarNo: data.aadhaarNo,
+                    mobile: data.mobile,
+                    email: data.email || null,
+                    dob: new Date(data.dob),
+                    bloodGroup: data.bloodGroup,
+                    isExecutive: data.isExecutive,
+                    position: data.position || null,
+                    photoUrl: data.photoUrl || null,
+                },
+            })
+
+            // 2. Auto-create income ledger
+            await tx.ledger.create({
+                data: {
+                    code: membershipCode,
+                    name: `${data.name} (${membershipCode})`,
+                    groupId: group.id,
+                    partyType: "MEMBER",
+                    memberId: member.id,
+                    isSystem: false,
+                    openingType: DrCr.CR,
+                    description: `Membership income ledger for ${membershipCode}`,
+                },
+            })
+
+            results.push(member)
+        }
+
+        return results
+    })
+}
+
+/**
  * Recalculate totalPaid and membershipStatus for a member
  * based on credits to their personal membership income ledger.
  *
@@ -89,11 +160,17 @@ export async function recalculateMemberStatus(memberId: string) {
 
     const totalPaid = Number(result._sum.credit || 0)
 
-    let membershipStatus: MembershipStatus = "PENDING"
-    if (totalPaid >= 100000) {
-        membershipStatus = "GOLD"
+    let membershipStatus: MembershipStatus = "PENDING" as any
+    if (totalPaid >= 110000) {
+        membershipStatus = "PLATINUM" as any
+    } else if (totalPaid >= 60000) {
+        membershipStatus = "GOLD" as any
+    } else if (totalPaid >= 35000) {
+        membershipStatus = "SILVER" as any
     } else if (totalPaid >= 10000) {
-        membershipStatus = "BASIC"
+        membershipStatus = "BASIC" as any
+    } else {
+        membershipStatus = "PENDING" as any
     }
 
     await prisma.member.update({

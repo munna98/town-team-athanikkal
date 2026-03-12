@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select"
 import { formatCurrency, bloodGroupLabels, membershipStatusConfig } from "@/lib/utils"
 import { Search, Plus, Loader2, Eye, FileEdit } from "lucide-react"
+import { BulkImportDialog } from "./BulkImportDialog"
 
 export function MemberTable() {
     const [members, setMembers] = useState<any[]>([])
@@ -80,7 +81,9 @@ export function MemberTable() {
                             <SelectItem value="ALL">All Status</SelectItem>
                             <SelectItem value="PENDING">Pending</SelectItem>
                             <SelectItem value="BASIC">Basic</SelectItem>
+                            <SelectItem value="SILVER">Silver</SelectItem>
                             <SelectItem value="GOLD">Gold</SelectItem>
+                            <SelectItem value="PLATINUM">Platinum</SelectItem>
                         </SelectContent>
                     </Select>
 
@@ -108,11 +111,14 @@ export function MemberTable() {
                     </Select>
                 </div>
 
-                <Link href="/admin/members/new" className="w-full md:w-auto">
-                    <Button className="bg-sky-600 hover:bg-sky-700 w-full md:w-auto">
-                        <Plus className="mr-2 h-4 w-4" /> Add Member
-                    </Button>
-                </Link>
+                <div className="flex gap-2 w-full md:w-auto">
+                    <BulkImportDialog />
+                    <Link href="/admin/members/new" className="flex-1 md:flex-none">
+                        <Button className="bg-sky-600 hover:bg-sky-700 w-full md:w-auto">
+                            <Plus className="mr-2 h-4 w-4" /> Add Member
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             <div className="border rounded-md bg-white">

@@ -326,6 +326,32 @@ const goldStyles = StyleSheet.create({
     },
 })
 
+// ─── SILVER Card Styles ─────────────────────────────────────────────
+const silverStyles = StyleSheet.create({
+    ...basicStyles,
+    bgTop: { ...basicStyles.bgTop, backgroundColor: "#64748b" },
+    bgBottom: { ...basicStyles.bgBottom, backgroundColor: "#f8fafc" },
+    stripe: { ...basicStyles.stripe, backgroundColor: "#94a3b8" },
+    tierText: { ...basicStyles.tierText, color: "#475569" },
+    memberCode: { ...basicStyles.memberCode, color: "#475569" },
+    photoBox: { ...basicStyles.photoBox, borderColor: "#64748b" },
+    photoInitial: { ...basicStyles.photoInitial, color: "#64748b" },
+    footerBar: { ...basicStyles.footerBar, backgroundColor: "#64748b" },
+})
+
+// ─── PLATINUM Card Styles ───────────────────────────────────────────
+const platinumStyles = StyleSheet.create({
+    ...basicStyles,
+    bgTop: { ...basicStyles.bgTop, backgroundColor: "#0f172a" },
+    bgBottom: { ...basicStyles.bgBottom, backgroundColor: "#f1f5f9" },
+    stripe: { ...basicStyles.stripe, backgroundColor: "#334155" },
+    tierText: { ...basicStyles.tierText, color: "#1e293b" },
+    memberCode: { ...basicStyles.memberCode, color: "#1e293b" },
+    photoBox: { ...basicStyles.photoBox, borderColor: "#0f172a" },
+    photoInitial: { ...basicStyles.photoInitial, color: "#0f172a" },
+    footerBar: { ...basicStyles.footerBar, backgroundColor: "#0f172a" },
+})
+
 // ─── Props ──────────────────────────────────────────────
 
 interface MembershipCardProps {
@@ -334,7 +360,7 @@ interface MembershipCardProps {
     bloodGroup: string
     mobile: string
     photoUrl?: string | null
-    membershipStatus: "BASIC" | "GOLD"
+    membershipStatus: "BASIC" | "SILVER" | "GOLD" | "PLATINUM"
     joinDate: string
 }
 
@@ -349,8 +375,12 @@ function PDFCardContent({
     membershipStatus,
     joinDate,
 }: MembershipCardProps) {
-    const s = membershipStatus === "GOLD" ? goldStyles : basicStyles
-    const tierLabel = membershipStatus === "GOLD" ? "GOLD MEMBER" : "BASIC MEMBER"
+    const s = 
+        membershipStatus === "PLATINUM" ? platinumStyles :
+        membershipStatus === "GOLD" ? goldStyles :
+        membershipStatus === "SILVER" ? silverStyles : basicStyles
+    
+    const tierLabel = `${membershipStatus} MEMBER`
 
     const formattedJoinDate = new Date(joinDate).toLocaleDateString("en-IN", {
         month: "short",
@@ -414,7 +444,10 @@ function PDFCardContent({
 // ─── Full PDF Document ──────────────────────────────────
 
 export function MembershipCardPDF(props: MembershipCardProps) {
-    const s = props.membershipStatus === "GOLD" ? goldStyles : basicStyles
+    const s = 
+        props.membershipStatus === "PLATINUM" ? platinumStyles :
+        props.membershipStatus === "GOLD" ? goldStyles :
+        props.membershipStatus === "SILVER" ? silverStyles : basicStyles
 
     return (
         <Document>

@@ -3,7 +3,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import prisma from "@/lib/prisma"
 import { HeroBackground } from "@/components/landing/HeroBackground"
-import { Trophy, Users, Calendar, ChevronRight, Shield, Droplet } from "lucide-react"
+import { Trophy, Users, Calendar, ChevronRight, Shield, Droplet, Instagram, MessageCircle } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
@@ -208,30 +208,80 @@ export default async function LandingPage() {
             </main>
 
             {/* ─── Footer ─── */}
-            <footer className="w-full border-t border-white/5 py-10 px-6 bg-[#060b14]">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-3">
-                        <Image
-                            src="/logo.png"
-                            alt="Town Team Athanikkal"
-                            width={32}
-                            height={32}
-                            className="rounded-full"
-                        />
-                        <span className="font-bold text-white">
-                            Town Team <span className="text-cyan-400">Athanikkal</span>
-                        </span>
+            {/* ─── Footer ─── */}
+            <footer className="w-full border-t border-white/5 bg-[#060b14] pt-16 pb-12 px-6">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+                        {/* Club Info */}
+                        <div className="flex flex-col gap-6">
+                            <Link href="/" className="flex items-center gap-3">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Town Team Athanikkal"
+                                    width={48}
+                                    height={48}
+                                    className="rounded-full shadow-lg shadow-cyan-500/10"
+                                />
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-white text-xl leading-tight">Town Team</span>
+                                    <span className="text-cyan-400 font-bold text-lg leading-tight">Athanikkal</span>
+                                </div>
+                            </Link>
+                            <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
+                                Elevating the game and building a legacy of excellence since our founding. Join us on our journey to the top.
+                            </p>
+                        </div>
+
+                        {/* Quick Links */}
+                        <div className="flex flex-col gap-5">
+                            <h4 className="text-white font-bold text-sm uppercase tracking-widest">Navigation</h4>
+                            <div className="grid grid-cols-1 gap-3">
+                                <Link href="#about" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium">About Us</Link>
+                                <Link href="#committee" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium">Executive Committee</Link>
+                                <Link href="/membership" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium">Membership Portal</Link>
+                                <Link href="/login" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium">Admin Dashboard</Link>
+                            </div>
+                        </div>
+
+                        {/* Social Connect */}
+                        <div className="flex flex-col gap-6">
+                            <h4 className="text-white font-bold text-sm uppercase tracking-widest">Connect With Us</h4>
+                            <div className="flex flex-col gap-3">
+                                <Link 
+                                    href="https://www.instagram.com/townteam_athanikkal?igsh=M3RsMWQ4cHR4Mndp" 
+                                    target="_blank" 
+                                    className="group flex items-center gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-pink-500/30 hover:bg-pink-500/5 transition-all duration-300"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-500 group-hover:scale-110 transition-transform">
+                                        <Instagram className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-white text-sm font-bold">Instagram</p>
+                                        <p className="text-slate-500 text-xs">@townteam_athanikkal</p>
+                                    </div>
+                                </Link>
+
+                                <a 
+                                    href="https://wa.me/918921330458" 
+                                    target="_blank" 
+                                    className="group flex items-center gap-4 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all duration-300"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                                        <MessageCircle className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-white text-sm font-bold">WhatsApp</p>
+                                        <p className="text-slate-500 text-xs">+91 89213 30458</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <p className="text-sm text-slate-600">
-                        &copy; {new Date().getFullYear()} Town Team Athanikkal. All rights reserved.
-                    </p>
-                    <div className="flex gap-6">
-                        <Link href="/login" className="text-sm text-slate-500 hover:text-cyan-400 transition-colors">
-                            Admin Login
-                        </Link>
-                        <Link href="/membership" className="text-sm text-slate-500 hover:text-cyan-400 transition-colors">
-                            Membership
-                        </Link>
+
+                    <div className="pt-8 border-t border-white/5 flex flex-col items-center gap-4">
+                        <p className="text-xs text-slate-600 font-medium text-center">
+                            &copy; {new Date().getFullYear()} Town Team Athanikkal. All rights reserved.
+                        </p>
                     </div>
                 </div>
             </footer>

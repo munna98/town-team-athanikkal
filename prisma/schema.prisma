@@ -43,7 +43,9 @@ enum BloodGroup {
 enum MembershipStatus {
   PENDING
   BASIC
+  SILVER
   GOLD
+  PLATINUM
 }
 
 enum Role {
@@ -69,6 +71,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   createdTransactions   Transaction[] @relation("CreatedTransactions")
+  updatedTransactions   Transaction[] @relation("UpdatedTransactions")
 }
 
 model Member {
@@ -141,6 +144,8 @@ model Transaction {
   createdBy     User            @relation("CreatedTransactions", fields: [createdById], references: [id])
   collectedById String?
   collectedBy   Member?         @relation("CollectedTransactions", fields: [collectedById], references: [id])
+  updatedById   String?
+  updatedBy     User?           @relation("UpdatedTransactions", fields: [updatedById], references: [id])
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 

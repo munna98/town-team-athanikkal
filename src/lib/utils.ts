@@ -99,5 +99,7 @@ export const bloodGroupLabels: Record<string, string> = {
 export const membershipStatusConfig: Record<string, { label: string; color: string; threshold: number }> = {
   PENDING: { label: "Pending", color: "bg-yellow-500", threshold: 0 },
   BASIC: { label: "Basic", color: "bg-blue-500", threshold: 10000 },
-  GOLD: { label: "Gold", color: "bg-amber-500", threshold: 100000 },
+  SILVER: { label: "Silver", color: "bg-slate-400", threshold: 35000 },
+  GOLD: { label: "Gold", color: "bg-amber-500", threshold: 60000 },
+  PLATINUM: { label: "Platinum", color: "bg-slate-800", threshold: 110000 },
 }

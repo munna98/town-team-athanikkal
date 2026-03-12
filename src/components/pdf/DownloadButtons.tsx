@@ -42,7 +42,7 @@ export function DownloadCardButton({ memberId, status }: { memberId: string; sta
             disabled={loading}
         >
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-            {status === "GOLD" ? "Gold ID Card" : "Basic ID Card"}
+            {status.charAt(0) + status.slice(1).toLowerCase()} ID Card
         </Button>
     )
 }
@@ -80,12 +80,12 @@ export function DownloadReceiptButton({ transactionId, referenceNo }: { transact
         <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-sky-600"
+            className="h-7 w-7 p-0 text-sky-600"
             onClick={handleDownload}
             disabled={loading}
+            title="Download PDF"
         >
-            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3 mr-1" />}
-            PDF
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
         </Button>
     )
 }
@@ -141,12 +141,12 @@ export function ShareReceiptButton({ transactionId, referenceNo, mobile }: { tra
         <Button
             variant="ghost"
             size="sm"
-            className="h-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+            className="h-7 w-7 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
             onClick={handleShare}
             disabled={loading}
+            title="Share on WhatsApp"
         >
-            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Share2 className="h-3 w-3 mr-1" />}
-            WhatsApp
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Share2 className="h-3 w-3" />}
         </Button>
     )
 }

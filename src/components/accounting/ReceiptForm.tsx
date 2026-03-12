@@ -199,19 +199,21 @@ export function ReceiptForm({
                                 )}
                             />
 
-                            <FormField
-                                control={form.control}
-                                name="narration"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Narration / Description</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="e.g., Monthly fee for July, Advance payment..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div className="md:col-span-2">
+                                <FormField
+                                    control={form.control}
+                                    name="narration"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Narration / Description</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g., Monthly fee for July, Advance payment..." {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
                             <FormField
                                 control={form.control}

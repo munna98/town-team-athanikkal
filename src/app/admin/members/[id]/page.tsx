@@ -62,20 +62,33 @@ export default async function MemberDetailPage({
 
     // Progress calculations
     const totalPaidNum = Number(member.totalPaid)
-    let nextThreshold = 10000 // Basic
+    let nextThreshold = 10000 // Basic (already reached if BASIC)
     let progressPct = 0
     let nextTierName = "Basic"
+    let nextTierColor = "bg-blue-500"
 
     if (member.membershipStatus === "PENDING") {
         nextThreshold = 10000
         nextTierName = "Basic"
+        nextTierColor = "bg-blue-500"
         progressPct = Math.min((totalPaidNum / nextThreshold) * 100, 100)
     } else if (member.membershipStatus === "BASIC") {
-        nextThreshold = 100000
+        nextThreshold = 35000
+        nextTierName = "Silver"
+        nextTierColor = "bg-slate-400"
+        progressPct = Math.min(((totalPaidNum - 10000) / (nextThreshold - 10000)) * 100, 100)
+    } else if (member.membershipStatus === "SILVER") {
+        nextThreshold = 60000
         nextTierName = "Gold"
-        progressPct = Math.min((totalPaidNum / nextThreshold) * 100, 100)
+        nextTierColor = "bg-amber-500"
+        progressPct = Math.min(((totalPaidNum - 35000) / (nextThreshold - 35000)) * 100, 100)
+    } else if (member.membershipStatus === "GOLD") {
+        nextThreshold = 110000
+        nextTierName = "Platinum"
+        nextTierColor = "bg-slate-800"
+        progressPct = Math.min(((totalPaidNum - 60000) / (nextThreshold - 60000)) * 100, 100)
     } else {
-        // Gold
+        // Platinum
         progressPct = 100
         nextTierName = "Max Tier Reached"
         nextThreshold = totalPaidNum
@@ -106,6 +119,7 @@ export default async function MemberDetailPage({
                     {member.membershipStatus !== "PENDING" && (
                         <DownloadCardButton memberId={member.id} status={member.membershipStatus} />
                     )}
+
                     <Link href={`/admin/members/${member.id}/edit`}>
                         <Button variant="outline">
                             <Edit className="mr-2 h-4 w-4" /> Edit Profile
@@ -135,15 +149,15 @@ export default async function MemberDetailPage({
                                 </div>
                             </div>
 
-                            {member.membershipStatus !== "GOLD" && (
+                            {member.membershipStatus !== "PLATINUM" && (
                                 <div className="space-y-2 mt-6 p-4 bg-slate-50 rounded-lg border">
                                     <div className="flex justify-between text-sm">
                                         <span className="font-medium text-slate-700">Progress to {nextTierName}</span>
                                         <span className="text-slate-500">{formatCurrency(totalPaidNum)} / {formatCurrency(nextThreshold)}</span>
                                     </div>
-                                    <Progress value={progressPct} className="h-2" />
+                                    <Progress value={progressPct} className="h-2" indicatorClassName={nextTierColor} />
                                     <p className="text-xs text-slate-500 text-center mt-2">
-                                        {formatCurrency(nextThreshold - totalPaidNum)} more needed for upgrade
+                                        {formatCurrency(Math.max(0, nextThreshold - totalPaidNum))} more needed for upgrade
                                     </p>
                                 </div>
                             )}

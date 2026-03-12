@@ -45,106 +45,114 @@ export default function MembershipPage() {
                     <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
                         Join the Town Team Athanikkal family. We offer progressive membership levels depending on your lifetime contribution to the club.
                     </p>
-                </div>
-
-                {/* ─── Pricing Cards ─── */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
-                    {/* PENDING / GUEST */}
+                  {/* ─── Pricing Cards ─── */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl">
+                    {/* BASIC TIER */}
                     <div className="bg-white/[0.03] rounded-2xl p-8 border border-white/[0.06] flex flex-col relative hover:border-white/10 transition-all duration-300">
                         <div className="mb-6">
-                            <h3 className="text-xl font-bold text-white mb-2">Registration</h3>
-                            <p className="text-slate-500 text-sm">Initial application status</p>
+                            <h3 className="text-xl font-bold text-cyan-400 mb-2">Basic</h3>
+                            <p className="text-slate-500 text-sm">Full participating member</p>
                         </div>
                         <div className="mb-8 flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-slate-300">₹500 - ₹9,999</span>
+                            <span className="text-3xl font-bold text-slate-300">₹10,000</span>
                         </div>
                         <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-400">
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-cyan-500 shrink-0" />
-                                <span>Registered in club directory</span>
+                                <span>Basic Membership Card</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-cyan-500 shrink-0" />
-                                <span>Invites to general club events</span>
+                                <span>Voting Rights</span>
                             </li>
-                            <li className="flex items-start gap-3 opacity-30">
-                                <Check className="w-5 h-5 text-slate-600 shrink-0" />
-                                <span>Basic Membership Card</span>
-                            </li>
-                            <li className="flex items-start gap-3 opacity-30">
-                                <Check className="w-5 h-5 text-slate-600 shrink-0" />
-                                <span>Voting rights in general body</span>
+                            <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-cyan-500 shrink-0" />
+                                <span>Access to team facilities</span>
                             </li>
                         </ul>
-                        <Button className="w-full font-medium bg-white/[0.04] border border-white/[0.08] text-slate-500 hover:bg-white/[0.06] rounded-xl" disabled>
-                            Contact Exec to Join
-                        </Button>
                     </div>
 
-                    {/* BASIC TIER — Featured */}
-                    <div className="bg-white/[0.04] rounded-2xl p-8 border-2 border-cyan-500/40 flex flex-col relative transform md:-translate-y-4 shadow-[0_0_40px_rgba(0,188,212,0.08)]">
-                        <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-cyan-500 text-[#0a0f1a] text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">
-                            Standard
-                        </div>
+                    {/* SILVER TIER */}
+                    <div className="bg-white/[0.03] rounded-2xl p-8 border border-white/[0.06] flex flex-col relative hover:border-white/10 transition-all duration-300">
                         <div className="mb-6">
-                            <h3 className="text-2xl font-bold text-cyan-400 mb-2">Basic Membership</h3>
-                            <p className="text-slate-500 text-sm">Full participating member</p>
+                            <h3 className="text-xl font-bold text-slate-300 mb-2">Silver</h3>
+                            <p className="text-slate-500 text-sm">Active contributors</p>
                         </div>
                         <div className="mb-8 flex items-baseline gap-2">
-                            <span className="text-4xl font-extrabold text-white">₹10,000+</span>
+                            <span className="text-3xl font-bold text-slate-300">₹35,000</span>
                         </div>
-                        <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-300">
+                        <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-400">
                             <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-cyan-400 shrink-0" />
-                                <span className="font-medium">All Pending Tier benefits</span>
+                                <Check className="w-5 h-5 text-slate-400 shrink-0" />
+                                <span>Silver Membership Card</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-cyan-400 shrink-0" />
-                                <span className="font-medium">Basic Membership Card</span>
+                                <Check className="w-5 h-5 text-slate-400 shrink-0" />
+                                <span>All Basic benefits</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-cyan-400 shrink-0" />
-                                <span className="font-medium">Full Voting Rights</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-cyan-400 shrink-0" />
-                                <span className="font-medium">Access to team facilities</span>
+                                <Check className="w-5 h-5 text-slate-400 shrink-0" />
+                                <span>Club merchandise</span>
                             </li>
                         </ul>
                     </div>
 
                     {/* GOLD TIER */}
-                    <div className="rounded-2xl p-8 border-2 border-amber-500/30 flex flex-col relative bg-gradient-to-br from-amber-500/[0.06] to-amber-600/[0.02] hover:border-amber-500/50 transition-all duration-300">
-                        <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-amber-500 to-amber-400 text-[#0a0f1a] text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
-                            <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
-                            Premium
+                    <div className="bg-white/[0.04] rounded-2xl p-8 border-2 border-amber-500/40 flex flex-col relative shadow-[0_0_40px_rgba(245,158,11,0.08)]">
+                        <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-amber-500 text-[#0a0f1a] text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">
+                            Popular
                         </div>
                         <div className="mb-6">
-                            <h3 className="text-2xl font-bold text-amber-400 mb-2">Gold Membership</h3>
-                            <p className="text-amber-300/50 text-sm font-medium">Patrons & major contributors</p>
+                            <h3 className="text-2xl font-bold text-amber-400 mb-2">Gold</h3>
+                            <p className="text-slate-500 text-sm">Patrons & major contributors</p>
                         </div>
                         <div className="mb-8 flex items-baseline gap-2">
-                            <span className="text-4xl font-extrabold bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">₹1,00,000+</span>
+                            <span className="text-4xl font-extrabold text-white">₹60,000</span>
                         </div>
-                        <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm">
+                        <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-300">
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-amber-400 shrink-0" />
-                                <span className="font-medium text-slate-300">All Basic Tier benefits</span>
+                                <span className="font-medium">Gold Membership Card</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-amber-400 shrink-0" />
-                                <span className="font-medium text-slate-300">Premium Gold Membership Card</span>
+                                <span className="font-medium">All Silver benefits</span>
                             </li>
-                            <li className="flex items-start gap-3">
+                            <li className="flex items-start gap-3 text-left">
                                 <Check className="w-5 h-5 text-amber-400 shrink-0" />
-                                <span className="font-medium text-slate-300">Special mention at annual events</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-amber-400 shrink-0" />
-                                <span className="font-medium text-slate-300">VIP seating in club tournaments</span>
+                                <span className="font-medium">VIP seating in club tournaments</span>
                             </li>
                         </ul>
                     </div>
+
+                    {/* PLATINUM TIER */}
+                    <div className="bg-slate-900 rounded-2xl p-8 border border-white/10 flex flex-col relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 group-hover:opacity-100 transition-opacity" />
+                        <div className="relative">
+                            <div className="mb-6">
+                                <h3 className="text-2xl font-bold text-indigo-400 mb-2">Platinum</h3>
+                                <p className="text-slate-500 text-sm">Executive sponsors</p>
+                            </div>
+                            <div className="mb-8 flex items-baseline gap-2">
+                                <span className="text-4xl font-extrabold text-white">₹1,10,000</span>
+                            </div>
+                            <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-400">
+                                <li className="flex items-start gap-3 text-left">
+                                    <Check className="w-5 h-5 text-indigo-400 shrink-0" />
+                                    <span>Platinum Membership Card</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <Check className="w-5 h-5 text-indigo-400 shrink-0" />
+                                    <span>Lifetime Honor</span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <Check className="w-5 h-5 text-indigo-400 shrink-0" />
+                                    <span>All Gold benefits</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
                 </div>
             </main>
 

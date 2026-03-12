@@ -22,7 +22,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         }
 
         if (member.membershipStatus === "PENDING") {
-            return NextResponse.json({ error: "Member must be BASIC or GOLD to generate a card" }, { status: 400 })
+            return NextResponse.json({ error: "Member must be BASIC or above to generate a card" }, { status: 400 })
         }
 
         const pdfElement = React.createElement(MembershipCardPDF, {
@@ -31,7 +31,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             bloodGroup: member.bloodGroup,
             mobile: member.mobile,
             photoUrl: member.photoUrl,
-            membershipStatus: member.membershipStatus as "BASIC" | "GOLD",
+            membershipStatus: member.membershipStatus as "BASIC" | "SILVER" | "GOLD" | "PLATINUM",
             joinDate: member.createdAt.toISOString(),
         })
 

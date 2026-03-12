@@ -1,4 +1,0 @@
-npx prisma migrate reset --force
-
-Clear databases (after confirmation of connection strings).
-Run npx prisma generate and npx prisma db push to apply the new schema.
