@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { ReportFilters } from "@/components/accounting/ReportFilters"
 import prisma from "@/lib/prisma"
+import { Suspense } from "react"
 
 export const dynamic = 'force-dynamic'
 
@@ -320,7 +321,9 @@ export default async function ReportsPage({
                 </div>
             </div>
 
-            <ReportFilters ledgers={ledgers} />
+            <Suspense fallback={<Card className="h-20 animate-pulse bg-slate-50" />}>
+                <ReportFilters ledgers={ledgers} />
+            </Suspense>
 
             <div className="mt-8">
                 {content}
