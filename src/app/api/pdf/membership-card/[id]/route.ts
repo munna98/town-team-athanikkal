@@ -15,13 +15,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     try {
         const member = await prisma.member.findUnique({
             where: { id },
+            include: { tier: true }
         })
 
         if (!member) {
             return NextResponse.json({ error: "Member not found" }, { status: 404 })
         }
 
-        if (member.membershipStatus === "PENDING") {
+        if (member.tier?.name === "PENDING") {
             return NextResponse.json({ error: "Member must be BASIC or above to generate a card" }, { status: 400 })
         }
 
@@ -31,7 +32,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             bloodGroup: member.bloodGroup,
             mobile: member.mobile,
             photoUrl: member.photoUrl,
-            membershipStatus: member.membershipStatus as "BASIC" | "SILVER" | "GOLD" | "PLATINUM",
+            membershipStatus: member.tier?.name || "BASIC",
             joinDate: member.createdAt.toISOString(),
         })
 

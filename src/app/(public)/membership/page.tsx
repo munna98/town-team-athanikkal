@@ -3,7 +3,30 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Check, ArrowLeft, Crown } from "lucide-react"
 
-export default function MembershipPage() {
+import prisma from "@/lib/prisma"
+
+export const dynamic = 'force-dynamic'
+
+export default async function MembershipPage() {
+    const tiers = await prisma.tier.findMany({ orderBy: { threshold: 'asc' } });
+    
+    const getThreshold = (name: string, fallback: number) => {
+        const tier = tiers.find(t => t.name === name);
+        return tier ? Number(tier.threshold) : fallback;
+    }
+
+    const basicPrice = getThreshold("BASIC", 10000);
+    const silverPrice = getThreshold("SILVER", 35000);
+    const goldPrice = getThreshold("GOLD", 60000);
+    const platinumPrice = getThreshold("PLATINUM", 110000);
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0
+        }).format(amount);
+    }
     return (
         <div className="flex flex-col min-h-screen bg-[#0a0f1a]">
             {/* ─── Navbar ─── */}
@@ -54,7 +77,7 @@ export default function MembershipPage() {
                             <p className="text-slate-500 text-sm">Full participating member</p>
                         </div>
                         <div className="mb-8 flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-slate-300">₹10,000</span>
+                            <span className="text-3xl font-bold text-slate-300">{formatCurrency(basicPrice)}</span>
                         </div>
                         <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-400">
                             <li className="flex items-start gap-3">
@@ -79,7 +102,7 @@ export default function MembershipPage() {
                             <p className="text-slate-500 text-sm">Active contributors</p>
                         </div>
                         <div className="mb-8 flex items-baseline gap-2">
-                            <span className="text-3xl font-bold text-slate-300">₹35,000</span>
+                            <span className="text-3xl font-bold text-slate-300">{formatCurrency(silverPrice)}</span>
                         </div>
                         <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-400">
                             <li className="flex items-start gap-3">
@@ -107,7 +130,7 @@ export default function MembershipPage() {
                             <p className="text-slate-500 text-sm">Patrons & major contributors</p>
                         </div>
                         <div className="mb-8 flex items-baseline gap-2">
-                            <span className="text-4xl font-extrabold text-white">₹60,000</span>
+                            <span className="text-4xl font-extrabold text-white">{formatCurrency(goldPrice)}</span>
                         </div>
                         <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-300">
                             <li className="flex items-start gap-3">
@@ -134,7 +157,7 @@ export default function MembershipPage() {
                                 <p className="text-slate-500 text-sm">Executive sponsors</p>
                             </div>
                             <div className="mb-8 flex items-baseline gap-2">
-                                <span className="text-4xl font-extrabold text-white">₹1,10,000</span>
+                                <span className="text-4xl font-extrabold text-white">{formatCurrency(platinumPrice)}</span>
                             </div>
                             <ul className="flex flex-col gap-4 flex-1 mb-8 text-sm text-slate-400">
                                 <li className="flex items-start gap-3 text-left">

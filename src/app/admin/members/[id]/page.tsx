@@ -4,10 +4,11 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, formatDate, bloodGroupLabels, membershipStatusConfig } from "@/lib/utils"
-import { ArrowLeft, Edit, FileText, Phone, Mail, MapPin, Calendar, Activity, CreditCard } from "lucide-react"
+import { formatCurrency, formatDate, bloodGroupLabels } from "@/lib/utils"
+import { ArrowLeft, Edit, FileText, Phone, Mail, MapPin, Calendar, Activity, CreditCard, Plus } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { DownloadCardButton, DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
+import { MemberReceiptDialog } from "@/components/members/MemberReceiptDialog"
 
 export const dynamic = 'force-dynamic'
 
@@ -19,16 +20,34 @@ export default async function MemberDetailPage({
     const resolvedParams = await params
     const { id } = resolvedParams
 
-    const member = await prisma.member.findUnique({
-        where: { id },
-        include: {
-            ledger: true,
-        }
-    })
+    const [member, rawLedgers, rawExecutives, rawTiers] = await Promise.all([
+        prisma.member.findUnique({
+            where: { id },
+            include: {
+                ledger: true,
+                tier: true
+            }
+        }),
+        prisma.ledger.findMany({
+            include: { group: true },
+            orderBy: { name: "asc" }
+        }),
+        prisma.member.findMany({
+            where: { isExecutive: true },
+            orderBy: { name: "asc" }
+        }),
+        prisma.tier.findMany({
+            orderBy: { threshold: 'asc' }
+        })
+    ])
 
     if (!member) {
         notFound()
     }
+
+    const ledgersData = JSON.parse(JSON.stringify(rawLedgers))
+    const executivesData = JSON.parse(JSON.stringify(rawExecutives))
+    const tiers = JSON.parse(JSON.stringify(rawTiers))
 
     // Fetch recent transactions via the member's ledger (TransactionLine → Transaction)
     let recentTransactions: any[] = []
@@ -58,40 +77,24 @@ export default async function MemberDetailPage({
             })
     }
 
-    const statusConf = membershipStatusConfig[member.membershipStatus]
+    const sortedTiers = (tiers as any[]).filter(t => t.name !== "PENDING") // For progress, we don't care about pending
+    const currentTierIndex = sortedTiers.findIndex(t => t.id === member.tierId)
+    const nextTier = currentTierIndex >= 0 && currentTierIndex < sortedTiers.length - 1 ? sortedTiers[currentTierIndex + 1] : sortedTiers[0];
 
-    // Progress calculations
-    const totalPaidNum = Number(member.totalPaid)
-    let nextThreshold = 10000 // Basic (already reached if BASIC)
-    let progressPct = 0
-    let nextTierName = "Basic"
-    let nextTierColor = "bg-blue-500"
+    let nextThreshold = nextTier ? Number(nextTier.threshold) : Number(member.tier?.threshold || 0);
+    let nextTierName = nextTier ? nextTier.name : "Max Tier Reached";
+    let nextTierColor = nextTier?.backgroundColor || "bg-slate-800";
+    let progressPct = 100;
 
-    if (member.membershipStatus === "PENDING") {
-        nextThreshold = 10000
-        nextTierName = "Basic"
-        nextTierColor = "bg-blue-500"
-        progressPct = Math.min((totalPaidNum / nextThreshold) * 100, 100)
-    } else if (member.membershipStatus === "BASIC") {
-        nextThreshold = 35000
-        nextTierName = "Silver"
-        nextTierColor = "bg-slate-400"
-        progressPct = Math.min(((totalPaidNum - 10000) / (nextThreshold - 10000)) * 100, 100)
-    } else if (member.membershipStatus === "SILVER") {
-        nextThreshold = 60000
-        nextTierName = "Gold"
-        nextTierColor = "bg-amber-500"
-        progressPct = Math.min(((totalPaidNum - 35000) / (nextThreshold - 35000)) * 100, 100)
-    } else if (member.membershipStatus === "GOLD") {
-        nextThreshold = 110000
-        nextTierName = "Platinum"
-        nextTierColor = "bg-slate-800"
-        progressPct = Math.min(((totalPaidNum - 60000) / (nextThreshold - 60000)) * 100, 100)
-    } else {
-        // Platinum
-        progressPct = 100
-        nextTierName = "Max Tier Reached"
-        nextThreshold = totalPaidNum
+    const totalPaidNum = Number(member.totalPaid || 0);
+
+    if (nextTier && currentTierIndex < sortedTiers.length - 1) {
+        const currentThreshold = Number(member.tier?.threshold || 0);
+        const range = nextThreshold - currentThreshold;
+        const paidInRange = totalPaidNum - currentThreshold;
+        progressPct = Math.max(0, Math.min((paidInRange / range) * 100, 100));
+    } else if (member.tier?.name === "PENDING" && nextTier) {
+        progressPct = Math.min((totalPaidNum / nextThreshold) * 100, 100);
     }
 
     return (
@@ -116,8 +119,18 @@ export default async function MemberDetailPage({
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    {member.membershipStatus !== "PENDING" && (
-                        <DownloadCardButton memberId={member.id} status={member.membershipStatus} />
+                    {member.tier?.name !== "PENDING" && (
+                        <DownloadCardButton memberId={member.id} status={member.tier?.name || "BASIC"} />
+                    )}
+
+                    {member.ledger?.id && (
+                        <MemberReceiptDialog 
+                            memberId={member.id}
+                            memberName={member.name}
+                            ledgerId={member.ledger.id}
+                            ledgers={ledgersData}
+                            executives={executivesData}
+                        />
                     )}
 
                     <Link href={`/admin/members/${member.id}/edit`}>
@@ -139,8 +152,8 @@ export default async function MemberDetailPage({
                             <div className="flex justify-between items-end mb-4">
                                 <div>
                                     <div className="text-sm text-slate-500 mb-1">Current Tier</div>
-                                    <Badge className={`${statusConf.color} text-white border-none text-base px-3 py-1 shadow-sm`}>
-                                        {statusConf.label}
+                                    <Badge className="border-none text-base px-3 py-1 shadow-sm" style={{ backgroundColor: member.tier?.backgroundColor || "#e2e8f0", color: member.tier?.textColor || "#1e293b" }}>
+                                        {member.tier?.name || "Unknown"}
                                     </Badge>
                                 </div>
                                 <div className="text-right">
@@ -149,13 +162,13 @@ export default async function MemberDetailPage({
                                 </div>
                             </div>
 
-                            {member.membershipStatus !== "PLATINUM" && (
+                            {member.tier?.name !== "PLATINUM" && (
                                 <div className="space-y-2 mt-6 p-4 bg-slate-50 rounded-lg border">
                                     <div className="flex justify-between text-sm">
                                         <span className="font-medium text-slate-700">Progress to {nextTierName}</span>
                                         <span className="text-slate-500">{formatCurrency(totalPaidNum)} / {formatCurrency(nextThreshold)}</span>
                                     </div>
-                                    <Progress value={progressPct} className="h-2" indicatorClassName={nextTierColor} />
+                                    <Progress value={progressPct} className="h-2" style={{ "--progress-background": nextTierColor } as React.CSSProperties} />
                                     <p className="text-xs text-slate-500 text-center mt-2">
                                         {formatCurrency(Math.max(0, nextThreshold - totalPaidNum))} more needed for upgrade
                                     </p>
@@ -229,7 +242,7 @@ export default async function MemberDetailPage({
                                 <CardTitle className="text-lg">Recent Transactions</CardTitle>
                                 <p className="text-sm text-slate-500">Recent receipts associated with this member.</p>
                             </div>
-                            <Link href={`/admin/accounting/reports?ledger=${member.ledger?.id}`}>
+                            <Link href={`/admin/accounting/reports?type=ledger-statement&ledger=${member.ledger?.id}`}>
                                 <Button variant="outline" size="sm">
                                     <FileText className="h-4 w-4 mr-2" /> Ledger Statement
                                 </Button>
@@ -239,9 +252,16 @@ export default async function MemberDetailPage({
                             {recentTransactions.length === 0 ? (
                                 <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed">
                                     <p>No transactions recorded yet.</p>
-                                    <Link href={`/admin/accounting/receipts`}>
-                                        <Button variant="link" className="text-sky-600">Record a Receipt</Button>
-                                    </Link>
+                                    {member.ledger?.id && (
+                                        <MemberReceiptDialog 
+                                            memberId={member.id}
+                                            memberName={member.name}
+                                            ledgerId={member.ledger.id}
+                                            ledgers={ledgersData}
+                                            executives={executivesData}
+                                            triggerVariant="link"
+                                        />
+                                    )}
                                 </div>
                             ) : (
                                 <div className="space-y-4">

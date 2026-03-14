@@ -34,7 +34,8 @@ import {
     LogOut,
     ChevronRight,
     Landmark,
-    KeyRound
+    KeyRound,
+    Award
 } from "lucide-react"
 
 const adminNavItems = [
@@ -62,10 +63,17 @@ const accountingNavItems = [
 ]
 
 const settingsNavItems = [
-    { title: "User Access", url: "/admin/settings/users", icon: Users },
-    { title: "Bank Accounts", url: "/admin/settings/banks", icon: Landmark },
-    { title: "Change Password", url: "/admin/settings/password", icon: KeyRound },
-    { title: "Settings", url: "/admin/settings", icon: Settings },
+    {
+        title: "Settings",
+        url: "/admin/settings",
+        icon: Settings,
+        items: [
+            { title: "General", url: "/admin/settings" },
+            { title: "User Access", url: "/admin/settings/users" },
+            { title: "Membership Tiers", url: "/admin/systems/tiers" },
+            { title: "Change Password", url: "/admin/settings/password" },
+        ]
+    }
 ]
 
 export function AppSidebar() {
@@ -76,12 +84,21 @@ export function AppSidebar() {
     const currentUserRole = session?.user?.role
     const { setOpenMobile, isMobile } = useSidebar()
     const [reportsOpen, setReportsOpen] = useState(pathname.startsWith("/admin/accounting/reports"))
+    const [settingsOpen, setSettingsOpen] = useState(pathname.startsWith("/admin/settings") || pathname.startsWith("/admin/systems"))
 
-    const filteredSettingsNavItems = settingsNavItems.filter(item => {
-        if (item.title === "User Access") {
-            return currentUserRole === "SUPER_ADMIN"
+    const filteredSettingsNavItems = settingsNavItems.map(item => {
+        if (item.items) {
+            return {
+                ...item,
+                items: item.items.filter(subItem => {
+                    if (subItem.title === "User Access" || subItem.title === "Membership Tiers") {
+                        return currentUserRole === "SUPER_ADMIN"
+                    }
+                    return true
+                })
+            }
         }
-        return true
+        return item
     })
 
     return (
@@ -181,16 +198,46 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {filteredSettingsNavItems.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton 
-                                        asChild 
-                                        isActive={pathname === item.url}
-                                        onClick={() => isMobile && setOpenMobile(false)}
-                                    >
-                                        <Link href={item.url}>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
+                                    {item.items ? (
+                                        <>
+                                            <SidebarMenuButton
+                                                onClick={() => setSettingsOpen(!settingsOpen)}
+                                                isActive={pathname.startsWith(item.url) || pathname.startsWith("/admin/systems")}
+                                            >
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                                <ChevronRight className={`ml-auto h-4 w-4 transition-transform duration-200 ${settingsOpen ? "rotate-90" : ""}`} />
+                                            </SidebarMenuButton>
+                                            {settingsOpen && (
+                                                <SidebarMenuSub className="transition-all duration-200">
+                                                    {item.items.map((subItem) => (
+                                                        <SidebarMenuSubItem key={subItem.title}>
+                                                            <SidebarMenuSubButton 
+                                                                asChild 
+                                                                isActive={pathname === subItem.url}
+                                                                onClick={() => isMobile && setOpenMobile(false)}
+                                                            >
+                                                                <Link href={subItem.url}>
+                                                                    <span>{subItem.title}</span>
+                                                                </Link>
+                                                            </SidebarMenuSubButton>
+                                                        </SidebarMenuSubItem>
+                                                    ))}
+                                                </SidebarMenuSub>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <SidebarMenuButton 
+                                            asChild 
+                                            isActive={pathname === item.url}
+                                            onClick={() => isMobile && setOpenMobile(false)}
+                                        >
+                                            <Link href={item.url}>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    )}
                                 </SidebarMenuItem>
                             ))}
                         </SidebarMenu>

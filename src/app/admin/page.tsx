@@ -19,12 +19,12 @@ async function getDashboardStats() {
         bankLedger,
         recentTransactions
     ] = await Promise.all([
-        prisma.member.count(),
-        prisma.member.count({ where: { membershipStatus: "PENDING" } }),
-        prisma.member.count({ where: { membershipStatus: "BASIC" } }),
-        prisma.member.count({ where: { membershipStatus: "SILVER" } }),
-        prisma.member.count({ where: { membershipStatus: "GOLD" } }),
-        prisma.member.count({ where: { membershipStatus: "PLATINUM" } }),
+        prisma.member.count({ where: { isActive: true } }),
+        prisma.member.count({ where: { tier: { name: "PENDING" }, isActive: true } }),
+        prisma.member.count({ where: { tier: { name: "BASIC" }, isActive: true } }),
+        prisma.member.count({ where: { tier: { name: "SILVER" }, isActive: true } }),
+        prisma.member.count({ where: { tier: { name: "GOLD" }, isActive: true } }),
+        prisma.member.count({ where: { tier: { name: "PLATINUM" }, isActive: true } }),
         prisma.ledger.findUnique({ where: { code: "1001" } }),
         prisma.ledger.findUnique({ where: { code: "1002" } }),
         prisma.transaction.findMany({

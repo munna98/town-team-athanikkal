@@ -74,6 +74,7 @@ export function ChangePasswordForm() {
                                 className="pl-10 pr-10"
                                 required
                                 placeholder="Enter your current password"
+                                autoComplete="new-password"
                             />
                             <button
                                 type="button"
@@ -96,6 +97,7 @@ export function ChangePasswordForm() {
                                 required
                                 placeholder="Min 8 characters"
                                 minLength={8}
+                                autoComplete="off"
                             />
                             <button
                                 type="button"
@@ -118,6 +120,7 @@ export function ChangePasswordForm() {
                                 required
                                 placeholder="Re-type new password"
                                 minLength={8}
+                                autoComplete="off"
                             />
                             <button
                                 type="button"

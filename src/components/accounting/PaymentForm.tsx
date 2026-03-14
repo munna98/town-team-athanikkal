@@ -33,12 +33,8 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
         },
     })
 
-    // Expense ledgers and Party ledgers
-    const expenseLedgers = ledgers.filter(l => l.group.nature === "EXPENSE" || l.group.nature === "ASSET" || l.group.nature === "LIABILITY")
-    // For payment, we can pay expenses, or settle liabilities, or give advances (to members)
-
+    // Expense and Liability ledgers
     const pureExpense = ledgers.filter(l => l.group.nature === "EXPENSE")
-    const partyLedgers = ledgers.filter(l => l.partyType === "MEMBER")
     const liabilities = ledgers.filter(l => l.group.nature === "LIABILITY" && !l.isSystem)
 
     async function onSubmit(data: PaymentInput) {
@@ -113,7 +109,7 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                 name="expenseLedgerId"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Debit Account (Expense/Party/Liability) *</FormLabel>
+                                        <FormLabel>Debit Account (Expense/Liability) *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
@@ -125,24 +121,16 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                                     <SelectLabel>Expense Ledgers</SelectLabel>
                                                     {pureExpense.map(l => (
                                                         <SelectItem key={l.id} value={l.id}>
-                                                            {l.name} {l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
+                                                            {l.name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectGroup>
-                                                {partyLedgers.length > 0 && (
-                                                    <SelectGroup>
-                                                        <SelectLabel>Party Ledgers (Advances/Settlements)</SelectLabel>
-                                                        {partyLedgers.map(l => (
-                                                            <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                                                        ))}
-                                                    </SelectGroup>
-                                                )}
                                                 {liabilities.length > 0 && (
                                                     <SelectGroup>
-                                                        <SelectLabel>Liabilities (Loan Repayments)</SelectLabel>
+                                                        <SelectLabel>Liabilities</SelectLabel>
                                                         {liabilities.map(l => (
                                                             <SelectItem key={l.id} value={l.id}>
-                                                                {l.name} {l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
+                                                                {l.name}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectGroup>

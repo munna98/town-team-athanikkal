@@ -58,6 +58,7 @@ export function MemberForm({
             isExecutive: initialData?.isExecutive || false,
             position: initialData?.position || "",
             photoUrl: initialData?.photoUrl || "",
+            isActive: initialData?.isActive ?? true,
         },
     })
 
@@ -216,21 +217,22 @@ export function MemberForm({
                                         </FormItem>
                                     )}
                                 />
-                                {form.watch("isExecutive") && (
-                                    <FormField
-                                        control={form.control}
-                                        name="position"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Executive Position (e.g. Secretary, President)</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Enter position" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                )}
+
+                                <FormField
+                                    control={form.control}
+                                    name="isActive"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center gap-3 p-4 border rounded-lg">
+                                            <FormControl className="mt-[2px]">
+                                                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel>Active Member Status</FormLabel>
+                                                <p className="text-sm text-muted-foreground">Inactive members will be hidden from default views and public pages.</p>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
 
                             <div className="md:col-span-2 border-t pt-4">

@@ -13,6 +13,7 @@ export async function GET(req: Request) {
     const status = searchParams.get("status")
     const isExecutive = searchParams.get("isExecutive")
     const bloodGroup = searchParams.get("bloodGroup")
+    const isActive = searchParams.get("isActive")
 
     const where: any = {}
 
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
     }
 
     if (status && status !== "ALL") {
-        where.membershipStatus = status
+        where.tier = { name: status }
     }
 
     if (isExecutive === "true") {
@@ -38,12 +39,43 @@ export async function GET(req: Request) {
         where.bloodGroup = bloodGroup
     }
 
+    if (isActive === "true") {
+        where.isActive = true
+    } else if (isActive === "false") {
+        where.isActive = false
+    }
+
     try {
-        const members = await prisma.member.findMany({
-            where,
-            orderBy: { membershipCode: "desc" },
+        const [members, tiers, incomeLedgers, executives] = await Promise.all([
+            prisma.member.findMany({
+                where,
+                include: {
+                    tier: true,
+                    ledger: true
+                },
+                orderBy: {
+                    membershipCode: "desc"
+                }
+            }),
+            prisma.tier.findMany({
+                orderBy: { threshold: 'asc' }
+            }),
+            prisma.ledger.findMany({
+                include: { group: true },
+                orderBy: { name: "asc" }
+            }),
+            prisma.member.findMany({
+                where: { isExecutive: true },
+                orderBy: { name: "asc" }
+            })
+        ])
+
+        return NextResponse.json({ 
+            members, 
+            tiers,
+            incomeLedgers,
+            executives
         })
-        return NextResponse.json(members)
     } catch (error) {
         console.error("GET members error: ", error)
         return NextResponse.json({ error: "Failed to fetch members" }, { status: 500 })

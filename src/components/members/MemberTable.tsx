@@ -20,17 +20,23 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select"
-import { formatCurrency, bloodGroupLabels, membershipStatusConfig } from "@/lib/utils"
-import { Search, Plus, Loader2, Eye, FileEdit } from "lucide-react"
+import { formatCurrency, bloodGroupLabels } from "@/lib/utils"
+import { Search, Plus, Loader2, Eye, FileEdit, ReceiptText } from "lucide-react"
 import { BulkImportDialog } from "./BulkImportDialog"
+import { MemberReceiptDialog } from "./MemberReceiptDialog"
 
 export function MemberTable() {
     const [members, setMembers] = useState<any[]>([])
+    const [tiers, setTiers] = useState<any[]>([])
+    const [ledgers, setLedgers] = useState<any[]>([])
+    const [executives, setExecutives] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
     const [status, setStatus] = useState("ALL")
     const [isExec, setIsExec] = useState("ALL")
     const [bloodGroup, setBloodGroup] = useState("ALL")
+    const [isActive, setIsActive] = useState("ALL")
+    const [mounted, setMounted] = useState(false)
 
     const fetchMembers = async () => {
         setLoading(true)
@@ -40,10 +46,18 @@ export function MemberTable() {
             if (status !== "ALL") params.append("status", status)
             if (isExec !== "ALL") params.append("isExecutive", isExec)
             if (bloodGroup !== "ALL") params.append("bloodGroup", bloodGroup)
+            if (isActive !== "ALL") params.append("isActive", isActive)
 
             const res = await fetch(`/api/members?${params.toString()}`)
             const data = await res.json()
-            setMembers(data)
+            if (data.members) {
+                setMembers(data.members)
+                setTiers(data.tiers || [])
+                setLedgers(data.incomeLedgers || [])
+                setExecutives(data.executives || [])
+            } else {
+                setMembers(data) // Fallback for old API format
+            }
         } catch (error) {
             console.error(error)
         } finally {
@@ -52,29 +66,40 @@ export function MemberTable() {
     }
 
     useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (!mounted) return
         const delayDebounceFn = setTimeout(() => {
             fetchMembers()
         }, 300)
 
         return () => clearTimeout(delayDebounceFn)
-    }, [search, status, isExec, bloodGroup])
+    }, [search, status, isExec, bloodGroup, isActive, mounted])
+
+    if (!mounted) {
+        return <div className="h-96 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+        </div>
+    }
 
     return (
         <div className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <div className="flex flex-row gap-2 w-full md:w-auto items-center">
                     <div className="relative w-full sm:w-64">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
                         <Input
-                            placeholder="Search code, name, mobile..."
-                            className="pl-9"
+                            placeholder="Search..."
+                            className="pl-9 h-9"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
 
                     <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger className="w-[140px]">
+                        <SelectTrigger className="w-[110px] h-9">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -88,8 +113,8 @@ export function MemberTable() {
                     </Select>
 
                     <Select value={isExec} onValueChange={setIsExec}>
-                        <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Exec/Member" />
+                        <SelectTrigger className="w-[110px] h-9">
+                            <SelectValue placeholder="Roles" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="ALL">All Roles</SelectItem>
@@ -99,23 +124,34 @@ export function MemberTable() {
                     </Select>
 
                     <Select value={bloodGroup} onValueChange={setBloodGroup}>
-                        <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Blood Group" />
+                        <SelectTrigger className="w-[110px] h-9">
+                            <SelectValue placeholder="Blood" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="ALL">All Blood Groups</SelectItem>
+                            <SelectItem value="ALL">All Blood</SelectItem>
                             {Object.entries(bloodGroupLabels).map(([key, label]) => (
                                 <SelectItem key={key} value={key}>{label}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
+
+                    <Select value={isActive} onValueChange={setIsActive}>
+                        <SelectTrigger className="w-[110px] h-9">
+                            <SelectValue placeholder="Active" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All States</SelectItem>
+                            <SelectItem value="true">Active</SelectItem>
+                            <SelectItem value="false">Inactive</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
-                <div className="flex gap-2 w-full md:w-auto">
-                    <BulkImportDialog />
+                <div className="flex gap-2 w-full md:w-auto shrink-0">
+                    <BulkImportDialog iconOnly />
                     <Link href="/admin/members/new" className="flex-1 md:flex-none">
-                        <Button className="bg-sky-600 hover:bg-sky-700 w-full md:w-auto">
-                            <Plus className="mr-2 h-4 w-4" /> Add Member
+                        <Button className="bg-sky-600 hover:bg-sky-700 w-full md:w-auto h-9">
+                            <Plus className="mr-1 h-4 w-4" /> Add Member
                         </Button>
                     </Link>
                 </div>
@@ -131,6 +167,7 @@ export function MemberTable() {
                             <TableHead>Blood Group</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Total Paid</TableHead>
+                            <TableHead className="text-right">Balance</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -145,16 +182,38 @@ export function MemberTable() {
                             </TableRow>
                         ) : members.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center text-slate-500">
+                                <TableCell colSpan={8} className="h-24 text-center text-slate-500">
                                     No members found.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             members.map((member) => {
-                                const statusConf = membershipStatusConfig[member.membershipStatus]
+                                const tierName = member.tier?.name || "Unknown"
+                                const tierBg = member.tier?.backgroundColor || "#e2e8f0"
+                                const tierColor = member.tier?.textColor || "#1e293b"
+                                
+                                // Calculate balance to next tier
+                                const sortedTiers = tiers.filter((t: any) => t.name !== "PENDING").sort((a: any, b: any) => Number(a.threshold) - Number(b.threshold))
+                                const currentTierIndex = sortedTiers.findIndex((t: any) => t.id === member.tierId)
+                                const nextTier = currentTierIndex >= 0 && currentTierIndex < sortedTiers.length - 1 ? sortedTiers[currentTierIndex + 1] : sortedTiers[0]
+                                
+                                let balanceToNext = 0;
+                                let isMaxTier = false;
+                                
+                                if (member.tier?.name === "PLATINUM") {
+                                    isMaxTier = true;
+                                } else if (nextTier) {
+                                    balanceToNext = Math.max(0, Number(nextTier.threshold) - Number(member.totalPaid));
+                                }
+
                                 return (
-                                    <TableRow key={member.id}>
-                                        <TableCell className="font-medium">{member.membershipCode}</TableCell>
+                                    <TableRow key={member.id} className={!member.isActive ? "bg-slate-50/50" : ""}>
+                                        <TableCell className="font-medium">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`h-2 w-2 rounded-full ${member.isActive ? "bg-emerald-500" : "bg-slate-300"}`} />
+                                                {member.membershipCode}
+                                            </div>
+                                        </TableCell>
                                         <TableCell>
                                             <div className="flex flex-col">
                                                 <span>{member.name}</span>
@@ -166,15 +225,32 @@ export function MemberTable() {
                                         <TableCell>{member.mobile}</TableCell>
                                         <TableCell>{bloodGroupLabels[member.bloodGroup]}</TableCell>
                                         <TableCell>
-                                            <Badge variant="outline" className={`${statusConf?.color} text-white border-none`}>
-                                                {statusConf?.label}
+                                            <Badge variant="outline" className="border-none" style={{ backgroundColor: tierBg, color: tierColor }}>
+                                                {tierName}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right font-medium">
                                             {formatCurrency(member.totalPaid)}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
+                                            {isMaxTier ? (
+                                                <span className="text-xs text-slate-400 font-medium">Nil</span>
+                                            ) : (
+                                                <span className="text-orange-500 font-medium">{formatCurrency(balanceToNext)}</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1">
+                                                {member.ledger?.id && (
+                                                    <MemberReceiptDialog 
+                                                        memberId={member.id}
+                                                        memberName={member.name}
+                                                        ledgerId={member.ledger.id}
+                                                        ledgers={ledgers}
+                                                        executives={executives}
+                                                        triggerVariant="icon"
+                                                    />
+                                                )}
                                                 <Link href={`/admin/members/${member.id}`}>
                                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-sky-600">
                                                         <Eye className="h-4 w-4" />

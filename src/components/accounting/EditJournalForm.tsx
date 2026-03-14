@@ -144,7 +144,7 @@ export function EditJournalForm({
                                                             <SelectContent>
                                                                 {ledgers.map(l => (
                                                                     <SelectItem key={l.id} value={l.id}>
-                                                                        {l.name} {l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
+                                                                        {l.name} {l.partyType === 'MEMBER' && l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
                                                                     </SelectItem>
                                                                 ))}
                                                             </SelectContent>

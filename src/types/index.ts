@@ -14,6 +14,7 @@ export const createMemberSchema = z.object({
     isExecutive: z.boolean().default(false),
     position: z.string().optional(),
     photoUrl: z.string().optional().default(""),
+    isActive: z.boolean().default(true),
 })
 
 export type CreateMemberInput = z.infer<typeof createMemberSchema>

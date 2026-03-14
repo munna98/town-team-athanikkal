@@ -360,7 +360,7 @@ interface MembershipCardProps {
     bloodGroup: string
     mobile: string
     photoUrl?: string | null
-    membershipStatus: "BASIC" | "SILVER" | "GOLD" | "PLATINUM"
+    membershipStatus: string
     joinDate: string
 }
 

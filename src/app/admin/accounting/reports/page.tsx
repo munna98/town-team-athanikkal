@@ -94,7 +94,9 @@ export default async function ReportsPage({
             <Card>
                 <CardHeader>
                     <CardTitle>
-                        {stmtData ? `Statement: ${stmtData.ledger.name} (${stmtData.ledger.code})` : "Please select a ledger"}
+                        {stmtData ? (
+                            `Statement: ${stmtData.ledger.name}${stmtData.ledger.name.includes(`(${stmtData.ledger.code})`) ? "" : ` (${stmtData.ledger.code})`}`
+                        ) : "Please select a ledger"}
                     </CardTitle>
                     {from && to && stmtData && (
                         <p className="text-sm text-slate-500">Period: {formatDate(from)} to {formatDate(to)}</p>

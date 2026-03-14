@@ -52,7 +52,7 @@ const BLOOD_GROUP_MAP: Record<string, BloodGroup> = {
     "AB-": "AB_NEG",
 }
 
-export function BulkImportDialog() {
+export function BulkImportDialog({ iconOnly = false }: { iconOnly?: boolean }) {
     const [open, setOpen] = useState(false)
     const [file, setFile] = useState<File | null>(null)
     const [data, setData] = useState<any[]>([])
@@ -171,8 +171,13 @@ export function BulkImportDialog() {
     return (
         <Dialog open={open} onOpenChange={(val) => { setOpen(val); if(!val) reset(); }}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="border-sky-200 text-sky-700 hover:bg-sky-50">
-                    <FileUp className="mr-2 h-4 w-4" /> Bulk Import
+                <Button 
+                    variant="outline" 
+                    className={`border-sky-200 text-sky-700 hover:bg-sky-50 ${iconOnly ? 'w-10 px-0' : ''}`}
+                    title={iconOnly ? "Bulk Import" : undefined}
+                >
+                    <FileUp className={`${iconOnly ? '' : 'mr-2'} h-4 w-4`} /> 
+                    {!iconOnly && "Bulk Import"}
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">

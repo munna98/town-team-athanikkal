@@ -2,6 +2,8 @@ import { ReceiptForm } from "@/components/accounting/ReceiptForm"
 import { TransactionsList } from "@/components/accounting/TransactionsList"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import prisma from "@/lib/prisma"
+import { Suspense } from "react"
+import { Loader2 } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +36,13 @@ export default async function ReceiptsPage() {
                 </TabsList>
 
                 <TabsContent value="new">
-                    <ReceiptForm ledgers={ledgers} executives={executives} />
+                    <Suspense fallback={
+                        <div className="flex items-center justify-center p-12 bg-white border rounded-lg shadow-sm">
+                            <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+                        </div>
+                    }>
+                        <ReceiptForm ledgers={ledgers} executives={executives} />
+                    </Suspense>
                 </TabsContent>
 
                 <TabsContent value="all">

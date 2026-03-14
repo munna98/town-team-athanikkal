@@ -79,6 +79,22 @@ async function main() {
     });
   }
 
+  const tierData = [
+    { name: "PENDING", threshold: 0, backgroundColor: "#e5e7eb", textColor: "#374151" },
+    { name: "BASIC", threshold: 10000, backgroundColor: "#dbeafe", textColor: "#1e3a8a" },
+    { name: "SILVER", threshold: 35000, backgroundColor: "#f3f4f6", textColor: "#4b5563" },
+    { name: "GOLD", threshold: 60000, backgroundColor: "#fef08a", textColor: "#854d0e" },
+    { name: "PLATINUM", threshold: 110000, backgroundColor: "#e5e7eb", textColor: "#1f2937" },
+  ];
+
+  for (const tier of tierData) {
+    await prisma.tier.upsert({
+      where: { name: tier.name },
+      update: {},
+      create: tier,
+    });
+  }
+
   const hashedPassword = await bcrypt.hash("admin@123", 10);
   await prisma.user.upsert({
     where: { email: "admin@townteamathanikkal.com" },
@@ -89,6 +105,14 @@ async function main() {
       role: "SUPER_ADMIN",
     },
   });
+
+  const pendingTier = await prisma.tier.findUnique({ where: { name: "PENDING" } });
+  if (pendingTier) {
+    await prisma.member.updateMany({
+        where: { tierId: null },
+        data: { tierId: pendingTier.id }
+    });
+  }
 
   console.log("✅ Seeding complete!");
 }

@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma"
-import { DrCr, MembershipStatus } from "@prisma/client"
+import { DrCr } from "@prisma/client"
 import { CreateMemberInput } from "@/types"
 
 /**
@@ -41,6 +41,10 @@ export async function createMemberWithLedger(data: CreateMemberInput) {
     })
     if (!group) throw new Error("Membership Income ledger group not found. Run seed first.")
 
+    const defaultTier = await prisma.tier.findUnique({
+        where: { name: "PENDING" }
+    })
+
     return await prisma.$transaction(async (tx) => {
         // 1. Create the member
         const member = await tx.member.create({
@@ -58,6 +62,8 @@ export async function createMemberWithLedger(data: CreateMemberInput) {
                 isExecutive: data.isExecutive,
                 position: data.position || null,
                 photoUrl: data.photoUrl || null,
+                tierId: defaultTier?.id || null,
+                isActive: data.isActive ?? true,
             },
         })
 
@@ -88,6 +94,10 @@ export async function bulkCreateMembers(dataArray: CreateMemberInput[]) {
     })
     if (!group) throw new Error("Membership Income ledger group not found. Run seed first.")
 
+    const defaultTier = await prisma.tier.findUnique({
+        where: { name: "PENDING" }
+    })
+
     const codes = await generateMembershipCodes(dataArray.length)
 
     return await prisma.$transaction(async (tx) => {
@@ -113,6 +123,8 @@ export async function bulkCreateMembers(dataArray: CreateMemberInput[]) {
                     isExecutive: data.isExecutive,
                     position: data.position || null,
                     photoUrl: data.photoUrl || null,
+                    tierId: defaultTier?.id || null,
+                    isActive: data.isActive ?? true,
                 },
             })
 
@@ -160,22 +172,29 @@ export async function recalculateMemberStatus(memberId: string) {
 
     const totalPaid = Number(result._sum.credit || 0)
 
-    let membershipStatus: MembershipStatus = "PENDING" as any
-    if (totalPaid >= 110000) {
-        membershipStatus = "PLATINUM" as any
-    } else if (totalPaid >= 60000) {
-        membershipStatus = "GOLD" as any
-    } else if (totalPaid >= 35000) {
-        membershipStatus = "SILVER" as any
-    } else if (totalPaid >= 10000) {
-        membershipStatus = "BASIC" as any
-    } else {
-        membershipStatus = "PENDING" as any
+    const tiers = await prisma.tier.findMany({
+        orderBy: { threshold: "desc" },
+    })
+
+    const calculatedTier = tiers.find((t) => totalPaid >= Number(t.threshold))
+    let finalTierId = calculatedTier?.id || tiers[tiers.length - 1]?.id || null
+
+    const member = await prisma.member.findUnique({
+        where: { id: memberId },
+        include: { tier: true },
+    })
+
+    if (!member) return
+
+    if (member.tier && calculatedTier) {
+        if (Number(calculatedTier.threshold) < Number(member.tier.threshold)) {
+            finalTierId = member.tierId
+        }
     }
 
     await prisma.member.update({
         where: { id: memberId },
-        data: { totalPaid, membershipStatus },
+        data: { totalPaid, tierId: finalTierId },
     })
 }
 

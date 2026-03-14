@@ -99,7 +99,7 @@ export function ReportFilters({ ledgers }: ReportFiltersProps) {
                                     <SelectContent>
                                         {ledgers.map((l) => (
                                             <SelectItem key={l.id} value={l.id}>
-                                                {l.code} - {l.name}
+                                                {l.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
