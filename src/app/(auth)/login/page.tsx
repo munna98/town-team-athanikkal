@@ -112,7 +112,7 @@ export default function LoginPage() {
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full bg-sky-600 hover:bg-sky-700" disabled={isLoading}>
+                            <Button type="submit" className="mb-4 w-full bg-sky-600 hover:bg-sky-700" disabled={isLoading}>
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -125,9 +125,6 @@ export default function LoginPage() {
                         </form>
                     </Form>
                 </CardContent>
-                <CardFooter className="flex justify-center border-t p-4 mt-4 bg-slate-50 text-sm text-slate-500 rounded-b-lg">
-                    Authorized personnel only. Contact committee for access.
-                </CardFooter>
             </Card>
         </div>
     )

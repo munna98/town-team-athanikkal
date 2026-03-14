@@ -26,7 +26,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             return NextResponse.json({ error: "Member must be BASIC or above to generate a card" }, { status: 400 })
         }
 
+        const requestUrl = new URL(req.url)
+        const logoUrl = `${requestUrl.protocol}//${requestUrl.host}/logo.png`
+
         const pdfElement = React.createElement(MembershipCardPDF, {
+            logoUrl: logoUrl,
             name: member.name,
             membershipCode: member.membershipCode,
             bloodGroup: member.bloodGroup,

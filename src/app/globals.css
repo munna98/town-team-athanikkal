@@ -125,41 +125,15 @@
 
 /* ===== Landing Page Animations ===== */
 
-@keyframes landing-float {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-20px) scale(1.03); }
-}
-
-@keyframes landing-float-reverse {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(15px) scale(0.97); }
-}
 
 @keyframes landing-stripe-move {
   0% { background-position: 0 0; }
   100% { background-position: 60px 60px; }
 }
 
-@keyframes landing-pulse-glow {
-  0%, 100% { opacity: 0.04; }
-  50% { opacity: 0.08; }
-}
-
 @keyframes landing-fade-in-up {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-.landing-float-1 {
-  animation: landing-float 8s ease-in-out infinite;
-}
-
-.landing-float-2 {
-  animation: landing-float-reverse 10s ease-in-out infinite;
-}
-
-.landing-float-3 {
-  animation: landing-float 12s ease-in-out infinite 2s;
 }
 
 .landing-stripes {

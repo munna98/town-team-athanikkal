@@ -1,5 +1,3 @@
-"use client"
-
 import {
     Document,
     Page,
@@ -21,7 +19,7 @@ Font.register({
 
 // ─── BASIC Card Styles ──────────────────────────────────────────────
 
-const basicStyles = StyleSheet.create({
+const basicStyles = {
     page: {
         fontFamily: "Roboto",
         backgroundColor: "#ffffff",
@@ -32,11 +30,11 @@ const basicStyles = StyleSheet.create({
         height: 215,
         margin: "auto",
         borderRadius: 12,
-        overflow: "hidden",
-        position: "relative",
+        overflow: "hidden" as const,
+        position: "relative" as const,
     },
     bgTop: {
-        position: "absolute",
+        position: "absolute" as const,
         top: 0,
         left: 0,
         right: 0,
@@ -44,7 +42,7 @@ const basicStyles = StyleSheet.create({
         backgroundColor: "#0284c7",
     },
     bgBottom: {
-        position: "absolute",
+        position: "absolute" as const,
         bottom: 0,
         left: 0,
         right: 0,
@@ -52,7 +50,7 @@ const basicStyles = StyleSheet.create({
         backgroundColor: "#f0f9ff",
     },
     stripe: {
-        position: "absolute",
+        position: "absolute" as const,
         top: 75,
         left: 0,
         right: 0,
@@ -60,14 +58,14 @@ const basicStyles = StyleSheet.create({
         backgroundColor: "#0ea5e9",
     },
     content: {
-        position: "relative",
+        position: "relative" as const,
         padding: 20,
         height: "100%",
     },
     headerRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
+        flexDirection: "row" as const,
+        justifyContent: "space-between" as const,
+        alignItems: "flex-start" as const,
         marginBottom: 8,
     },
     clubTitle: {
@@ -76,11 +74,16 @@ const basicStyles = StyleSheet.create({
         color: "#ffffff",
         letterSpacing: 0.5,
     },
+    logo: {
+        width: 30,
+        height: 30,
+        marginRight: 8,
+    },
     clubSub: {
         fontSize: 6,
         color: "#bae6fd",
         letterSpacing: 2,
-        textTransform: "uppercase",
+        textTransform: "uppercase" as const,
         marginTop: 2,
     },
     tierBadge: {
@@ -94,10 +97,10 @@ const basicStyles = StyleSheet.create({
         fontWeight: 700,
         color: "#0284c7",
         letterSpacing: 1.5,
-        textTransform: "uppercase",
+        textTransform: "uppercase" as const,
     },
     bodyRow: {
-        flexDirection: "row",
+        flexDirection: "row" as const,
         marginTop: 22,
         gap: 15,
     },
@@ -106,9 +109,11 @@ const basicStyles = StyleSheet.create({
         height: 75,
         borderRadius: 6,
         backgroundColor: "#e0f2fe",
-        justifyContent: "center",
-        alignItems: "center",
-        border: "2px solid #0284c7",
+        justifyContent: "center" as const,
+        alignItems: "center" as const,
+        borderWidth: 2,
+        borderColor: "#0284c7",
+        borderStyle: "solid" as const,
     },
     photoInitial: {
         fontSize: 28,
@@ -119,11 +124,11 @@ const basicStyles = StyleSheet.create({
         width: 65,
         height: 75,
         borderRadius: 6,
-        objectFit: "cover",
+        objectFit: "cover" as const,
     },
     infoBlock: {
         flex: 1,
-        justifyContent: "center",
+        justifyContent: "center" as const,
     },
     memberName: {
         fontSize: 14,
@@ -139,14 +144,14 @@ const basicStyles = StyleSheet.create({
         letterSpacing: 1,
     },
     detailRow: {
-        flexDirection: "row",
+        flexDirection: "row" as const,
         marginBottom: 3,
     },
     detailLabel: {
         fontSize: 7,
         color: "#94a3b8",
         width: 55,
-        textTransform: "uppercase",
+        textTransform: "uppercase" as const,
         letterSpacing: 0.5,
     },
     detailValue: {
@@ -155,179 +160,79 @@ const basicStyles = StyleSheet.create({
         fontWeight: 400,
     },
     footerBar: {
-        position: "absolute",
+        position: "absolute" as const,
         bottom: 0,
         left: 0,
         right: 0,
         backgroundColor: "#0284c7",
         paddingHorizontal: 20,
         paddingVertical: 6,
-        flexDirection: "row",
-        justifyContent: "space-between",
+        flexDirection: "row" as const,
+        justifyContent: "space-between" as const,
     },
     footerText: {
         fontSize: 6,
         color: "#bae6fd",
         letterSpacing: 0.5,
     },
-})
+}
 
 // ─── GOLD Card Styles ──────────────────────────────────────────────
 
-const goldStyles = StyleSheet.create({
-    page: {
-        fontFamily: "Roboto",
-        backgroundColor: "#ffffff",
-        padding: 0,
-    },
-    card: {
-        width: 340,
-        height: 215,
-        margin: "auto",
-        borderRadius: 12,
-        overflow: "hidden",
-        position: "relative",
-    },
+const goldStyles = {
+    ...basicStyles,
     bgTop: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 80,
+        ...basicStyles.bgTop,
         backgroundColor: "#b45309",
     },
     bgBottom: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 135,
+        ...basicStyles.bgBottom,
         backgroundColor: "#fffbeb",
     },
     stripe: {
-        position: "absolute",
-        top: 75,
-        left: 0,
-        right: 0,
-        height: 10,
+        ...basicStyles.stripe,
         backgroundColor: "#f59e0b",
     },
-    content: {
-        position: "relative",
-        padding: 20,
-        height: "100%",
-    },
-    headerRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        marginBottom: 8,
-    },
-    clubTitle: {
-        fontSize: 13,
-        fontWeight: 700,
-        color: "#ffffff",
-        letterSpacing: 0.5,
-    },
     clubSub: {
-        fontSize: 6,
+        ...basicStyles.clubSub,
         color: "#fde68a",
-        letterSpacing: 2,
-        textTransform: "uppercase",
-        marginTop: 2,
     },
     tierBadge: {
+        ...basicStyles.tierBadge,
         backgroundColor: "#fef3c7",
-        borderRadius: 4,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        border: "1px solid #f59e0b",
+        borderWidth: 1,
+        borderColor: "#f59e0b",
+        borderStyle: "solid" as const,
     },
     tierText: {
-        fontSize: 7,
-        fontWeight: 700,
+        ...basicStyles.tierText,
         color: "#92400e",
-        letterSpacing: 1.5,
-        textTransform: "uppercase",
-    },
-    bodyRow: {
-        flexDirection: "row",
-        marginTop: 22,
-        gap: 15,
     },
     photoBox: {
-        width: 65,
-        height: 75,
-        borderRadius: 6,
+        ...basicStyles.photoBox,
         backgroundColor: "#fef3c7",
-        justifyContent: "center",
-        alignItems: "center",
-        border: "2px solid #b45309",
+        borderColor: "#b45309",
     },
     photoInitial: {
-        fontSize: 28,
-        fontWeight: 700,
+        ...basicStyles.photoInitial,
         color: "#b45309",
-    },
-    photo: {
-        width: 65,
-        height: 75,
-        borderRadius: 6,
-        objectFit: "cover",
-    },
-    infoBlock: {
-        flex: 1,
-        justifyContent: "center",
-    },
-    memberName: {
-        fontSize: 14,
-        fontWeight: 700,
-        color: "#0f172a",
-        marginBottom: 4,
     },
     memberCode: {
-        fontSize: 9,
-        fontWeight: 700,
+        ...basicStyles.memberCode,
         color: "#b45309",
-        marginBottom: 8,
-        letterSpacing: 1,
-    },
-    detailRow: {
-        flexDirection: "row",
-        marginBottom: 3,
-    },
-    detailLabel: {
-        fontSize: 7,
-        color: "#94a3b8",
-        width: 55,
-        textTransform: "uppercase",
-        letterSpacing: 0.5,
-    },
-    detailValue: {
-        fontSize: 8,
-        color: "#334155",
-        fontWeight: 400,
     },
     footerBar: {
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
+        ...basicStyles.footerBar,
         backgroundColor: "#b45309",
-        paddingHorizontal: 20,
-        paddingVertical: 6,
-        flexDirection: "row",
-        justifyContent: "space-between",
     },
     footerText: {
-        fontSize: 6,
+        ...basicStyles.footerText,
         color: "#fde68a",
-        letterSpacing: 0.5,
     },
-})
+}
 
 // ─── SILVER Card Styles ─────────────────────────────────────────────
-const silverStyles = StyleSheet.create({
+const silverStyles = {
     ...basicStyles,
     bgTop: { ...basicStyles.bgTop, backgroundColor: "#64748b" },
     bgBottom: { ...basicStyles.bgBottom, backgroundColor: "#f8fafc" },
@@ -337,10 +242,10 @@ const silverStyles = StyleSheet.create({
     photoBox: { ...basicStyles.photoBox, borderColor: "#64748b" },
     photoInitial: { ...basicStyles.photoInitial, color: "#64748b" },
     footerBar: { ...basicStyles.footerBar, backgroundColor: "#64748b" },
-})
+}
 
 // ─── PLATINUM Card Styles ───────────────────────────────────────────
-const platinumStyles = StyleSheet.create({
+const platinumStyles = {
     ...basicStyles,
     bgTop: { ...basicStyles.bgTop, backgroundColor: "#0f172a" },
     bgBottom: { ...basicStyles.bgBottom, backgroundColor: "#f1f5f9" },
@@ -350,11 +255,19 @@ const platinumStyles = StyleSheet.create({
     photoBox: { ...basicStyles.photoBox, borderColor: "#0f172a" },
     photoInitial: { ...basicStyles.photoInitial, color: "#0f172a" },
     footerBar: { ...basicStyles.footerBar, backgroundColor: "#0f172a" },
-})
+}
+
+const styles = {
+    BASIC: StyleSheet.create(basicStyles),
+    GOLD: StyleSheet.create(goldStyles),
+    SILVER: StyleSheet.create(silverStyles),
+    PLATINUM: StyleSheet.create(platinumStyles),
+}
 
 // ─── Props ──────────────────────────────────────────────
 
 interface MembershipCardProps {
+    logoUrl?: string
     name: string
     membershipCode: string
     bloodGroup: string
@@ -367,6 +280,7 @@ interface MembershipCardProps {
 // ─── Card Component ──────────────────────────────────────
 
 function PDFCardContent({
+    logoUrl,
     name,
     membershipCode,
     bloodGroup,
@@ -376,9 +290,9 @@ function PDFCardContent({
     joinDate,
 }: MembershipCardProps) {
     const s = 
-        membershipStatus === "PLATINUM" ? platinumStyles :
-        membershipStatus === "GOLD" ? goldStyles :
-        membershipStatus === "SILVER" ? silverStyles : basicStyles
+        membershipStatus === "PLATINUM" ? styles.PLATINUM :
+        membershipStatus === "GOLD" ? styles.GOLD :
+        membershipStatus === "SILVER" ? styles.SILVER : styles.BASIC
     
     const tierLabel = `${membershipStatus} MEMBER`
 
@@ -397,9 +311,12 @@ function PDFCardContent({
             <View style={s.content}>
                 {/* Header */}
                 <View style={s.headerRow}>
-                    <View>
-                        <Text style={s.clubTitle}>Town Team Athanikkal</Text>
-                        <Text style={s.clubSub}>Football Club</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        {logoUrl && <Image src={logoUrl} style={s.logo} />}
+                        <View>
+                            <Text style={s.clubTitle}>TOWN TEAM ATHANIKKAL</Text>
+                            <Text style={s.clubSub}>Sports Club</Text>
+                        </View>
                     </View>
                     <View style={s.tierBadge}>
                         <Text style={s.tierText}>{tierLabel}</Text>
@@ -434,7 +351,7 @@ function PDFCardContent({
                 </View>
             </View>
             <View style={s.footerBar}>
-                <Text style={s.footerText}>Town Team Athanikkal</Text>
+                <Text style={s.footerText}>TOWN TEAM ATHANIKKAL</Text>
                 <Text style={s.footerText}>Athanikkal, Kerala</Text>
             </View>
         </View>
@@ -445,9 +362,9 @@ function PDFCardContent({
 
 export function MembershipCardPDF(props: MembershipCardProps) {
     const s = 
-        props.membershipStatus === "PLATINUM" ? platinumStyles :
-        props.membershipStatus === "GOLD" ? goldStyles :
-        props.membershipStatus === "SILVER" ? silverStyles : basicStyles
+        props.membershipStatus === "PLATINUM" ? styles.PLATINUM :
+        props.membershipStatus === "GOLD" ? styles.GOLD :
+        props.membershipStatus === "SILVER" ? styles.SILVER : styles.BASIC
 
     return (
         <Document>

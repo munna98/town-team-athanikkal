@@ -9,10 +9,6 @@ export function HeroBackground() {
             {/* Animated diagonal stripes */}
             <div className="landing-stripes" />
 
-            {/* Floating football shapes */}
-            <div className="landing-float-1 absolute w-64 h-64 rounded-full border border-cyan-500/10 top-[10%] left-[5%]" />
-            <div className="landing-float-2 absolute w-96 h-96 rounded-full border border-cyan-400/8 top-[20%] right-[-5%]" />
-            <div className="landing-float-3 absolute w-48 h-48 rounded-full border border-emerald-500/10 bottom-[10%] left-[30%]" />
 
             {/* Hexagonal pattern accent */}
             <div className="absolute top-0 right-0 w-1/2 h-full opacity-[0.03]"

@@ -186,12 +186,6 @@ export async function recalculateMemberStatus(memberId: string) {
 
     if (!member) return
 
-    if (member.tier && calculatedTier) {
-        if (Number(calculatedTier.threshold) < Number(member.tier.threshold)) {
-            finalTierId = member.tierId
-        }
-    }
-
     await prisma.member.update({
         where: { id: memberId },
         data: { totalPaid, tierId: finalTierId },

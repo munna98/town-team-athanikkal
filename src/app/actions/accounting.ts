@@ -52,6 +52,7 @@ export async function submitReceipt(data: z.infer<typeof receiptSchema>) {
 
         revalidatePath("/admin/accounting/receipts")
         revalidatePath("/admin/accounting/reports")
+        revalidatePath("/admin/members")
         return { 
             success: true, 
             transactionId: transaction.id,
@@ -146,8 +147,18 @@ export async function submitJournal(data: z.infer<typeof journalSchema>) {
             lines: parsed.lines
         })
 
+        // Recalculate status for all involved members
+        const ledgers = await prisma.ledger.findMany({
+            where: { id: { in: parsed.lines.map(l => l.ledgerId) } }
+        })
+        const memberIds = ledgers.map(l => l.memberId).filter(Boolean) as string[]
+        for (const mid of memberIds) {
+            await recalculateMemberStatus(mid)
+        }
+
         revalidatePath("/admin/accounting/journal")
         revalidatePath("/admin/accounting/reports")
+        revalidatePath("/admin/members")
         return { success: true, transactionId: transaction.id }
     } catch (error: any) {
         return { error: error.message || "Failed to submit journal" }
@@ -243,6 +254,13 @@ export async function updateReceipt(id: string, data: z.infer<typeof receiptSche
         if (!debitLedger) throw new Error(`${parsed.cashOrBank} ledger not found`)
 
 
+        // 1. Find existing transaction to see if member changed
+        const oldTransaction = await prisma.transaction.findUnique({
+            where: { id },
+            include: { lines: { include: { ledger: true } } }
+        })
+        const oldMemberId = oldTransaction?.lines.find(l => Number(l.credit) > 0)?.ledger?.memberId
+
         await prisma.$transaction(async (tx) => {
             await tx.transactionLine.deleteMany({ where: { transactionId: id } })
             await tx.transaction.update({
@@ -263,13 +281,20 @@ export async function updateReceipt(id: string, data: z.infer<typeof receiptSche
             })
         })
 
+        // 2. Recalculate status for the old member (if any)
+        if (oldMemberId) {
+            await recalculateMemberStatus(oldMemberId)
+        }
+
+        // 3. Recalculate status for the new member (if different and exists)
         const creditedLedger = await prisma.ledger.findUnique({ where: { id: parsed.incomeLedgerId } })
-        if (creditedLedger?.memberId) {
+        if (creditedLedger?.memberId && creditedLedger.memberId !== oldMemberId) {
             await recalculateMemberStatus(creditedLedger.memberId)
         }
 
         revalidatePath("/admin/accounting/receipts")
         revalidatePath("/admin/accounting/reports")
+        revalidatePath("/admin/members")
         return { success: true }
     } catch (error: any) {
         return { error: error.message || "Failed to update receipt" }
@@ -369,6 +394,13 @@ export async function updateJournal(id: string, data: z.infer<typeof journalSche
         }
 
 
+        // 1. Identify all affected members (old and new)
+        const oldTransaction = await prisma.transaction.findUnique({
+            where: { id },
+            include: { lines: { include: { ledger: true } } }
+        })
+        const oldMemberIds = oldTransaction?.lines.map(l => l.ledger?.memberId).filter(Boolean) as string[]
+        
         await prisma.$transaction(async (tx) => {
             await tx.transactionLine.deleteMany({ where: { transactionId: id } })
             await tx.transaction.update({
@@ -390,8 +422,20 @@ export async function updateJournal(id: string, data: z.infer<typeof journalSche
             })
         })
 
+        // 2. Recalculate status for all involved members
+        const newLedgers = await prisma.ledger.findMany({
+            where: { id: { in: parsed.lines.map(l => l.ledgerId) } }
+        })
+        const newMemberIds = newLedgers.map(l => l.memberId).filter(Boolean) as string[]
+        
+        const allMemberIds = Array.from(new Set([...oldMemberIds, ...newMemberIds]))
+        for (const mid of allMemberIds) {
+            await recalculateMemberStatus(mid)
+        }
+
         revalidatePath("/admin/accounting/journal")
         revalidatePath("/admin/accounting/reports")
+        revalidatePath("/admin/members")
         return { success: true }
     } catch (error: any) {
         return { error: error.message || "Failed to update journal" }
