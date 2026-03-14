@@ -215,11 +215,23 @@ export function MemberTable() {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex flex-col">
-                                                <span>{member.name}</span>
-                                                {member.isExecutive && (
-                                                    <span className="text-[10px] uppercase font-bold text-sky-600 tracking-wider">Executive</span>
-                                                )}
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-8 w-8 rounded-full overflow-hidden bg-slate-100 shrink-0 flex items-center justify-center">
+                                                    {member.photoUrl ? (
+                                                        // eslint-disable-next-line @next/next/no-img-element
+                                                        <img src={member.photoUrl} alt={member.name} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <span className="text-xs font-bold text-slate-400">
+                                                            {member.name.charAt(0).toUpperCase()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span>{member.name}</span>
+                                                    {member.isExecutive && (
+                                                        <span className="text-[10px] uppercase font-bold text-sky-600 tracking-wider">Executive</span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>{member.mobile}</TableCell>

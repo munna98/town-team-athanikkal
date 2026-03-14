@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2 } from "lucide-react"
+import { PhotoUpload } from "./PhotoUpload"
 
 export function MemberForm({
     initialData,
@@ -199,7 +200,24 @@ export function MemberForm({
                                 )}
                             />
 
-                            {/* Uploadthing photo upload would go here. Skipped for now per request. */}
+                            <div className="md:col-span-2">
+                                <FormField
+                                    control={form.control}
+                                    name="photoUrl"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Member Photo</FormLabel>
+                                            <FormControl>
+                                                <PhotoUpload
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
 
                             <div className="md:col-span-2 space-y-4">
                                 <FormField
@@ -217,6 +235,22 @@ export function MemberForm({
                                         </FormItem>
                                     )}
                                 />
+
+                                {form.watch("isExecutive") && (
+                                    <FormField
+                                        control={form.control}
+                                        name="position"
+                                        render={({ field }) => (
+                                            <FormItem className="pl-10">
+                                                <FormLabel>Position / Title</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="e.g. President, Secretary" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
 
                                 <FormField
                                     control={form.control}

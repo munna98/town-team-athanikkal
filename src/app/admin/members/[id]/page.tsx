@@ -9,6 +9,7 @@ import { ArrowLeft, Edit, FileText, Phone, Mail, MapPin, Calendar, Activity, Cre
 import { Progress } from "@/components/ui/progress"
 import { DownloadCardButton, DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
 import { MemberReceiptDialog } from "@/components/members/MemberReceiptDialog"
+import { PhotoViewer } from "@/components/members/PhotoViewer"
 
 export const dynamic = 'force-dynamic'
 
@@ -106,6 +107,15 @@ export default async function MemberDetailPage({
                             <ArrowLeft className="h-4 w-4" />
                         </Button>
                     </Link>
+                    {member.photoUrl ? (
+                        <PhotoViewer src={member.photoUrl} alt={member.name} />
+                    ) : (
+                        <div className="h-16 w-16 rounded-full overflow-hidden bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center shrink-0 ring-2 ring-sky-100 ring-offset-2">
+                            <span className="text-2xl font-bold text-sky-600">
+                                {member.name.charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                    )}
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
                             {member.name}

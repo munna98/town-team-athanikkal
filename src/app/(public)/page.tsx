@@ -180,8 +180,7 @@ export default async function LandingPage() {
                                     >
                                         {exec.photoUrl ? (
                                             <div className="w-24 h-24 mx-auto mb-5 rounded-full overflow-hidden ring-2 ring-cyan-500/20 ring-offset-2 ring-offset-[#0a0f1a]">
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={exec.photoUrl} alt={exec.name} className="w-full h-full object-cover" />
+                                                <Image src={exec.photoUrl} alt={exec.name} width={96} height={96} className="w-full h-full object-cover" />
                                             </div>
                                         ) : (
                                             <div className="w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 text-cyan-300 text-3xl font-bold flex items-center justify-center rounded-full mx-auto mb-5 ring-2 ring-cyan-500/20 ring-offset-2 ring-offset-[#0a0f1a]">
