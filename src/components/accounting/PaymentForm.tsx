@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { paymentSchema, PaymentInput } from "@/types"
@@ -15,9 +15,10 @@ import {
     Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form"
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
+import { LedgerCombobox } from "./LedgerCombobox"
+import { Loader2, CheckCircle2 } from "lucide-react"
 
 export function PaymentForm({ ledgers }: { ledgers: any[] }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -25,13 +26,17 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
     const form = useForm<PaymentInput>({
         resolver: zodResolver(paymentSchema),
         defaultValues: {
-            date: new Date().toISOString().split('T')[0],
+            date: "",
             amount: 0,
             cashOrBank: "CASH",
             expenseLedgerId: "",
             narration: "",
         },
     })
+
+    useEffect(() => {
+        form.setValue("date", new Date().toISOString().split('T')[0])
+    }, [form])
 
     // Expense and Liability ledgers
     const pureExpense = ledgers.filter(l => l.group.nature === "EXPENSE")
@@ -110,33 +115,13 @@ export function PaymentForm({ ledgers }: { ledgers: any[] }) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Debit Account (Expense/Liability) *</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select ledger to debit" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectGroup>
-                                                    <SelectLabel>Expense Ledgers</SelectLabel>
-                                                    {pureExpense.map(l => (
-                                                        <SelectItem key={l.id} value={l.id}>
-                                                            {l.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectGroup>
-                                                {liabilities.length > 0 && (
-                                                    <SelectGroup>
-                                                        <SelectLabel>Liabilities</SelectLabel>
-                                                        {liabilities.map(l => (
-                                                            <SelectItem key={l.id} value={l.id}>
-                                                                {l.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectGroup>
-                                                )}
-                                            </SelectContent>
-                                        </Select>
+                                            <LedgerCombobox
+                                                ledgers={[...pureExpense, ...liabilities]}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                placeholder="Choose expense/liability account..."
+                                                showMemberCodesOnly={true}
+                                            />
                                         <FormMessage />
                                     </FormItem>
                                 )}

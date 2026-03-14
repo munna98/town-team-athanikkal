@@ -16,8 +16,9 @@ import {
     Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form"
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { LedgerCombobox } from "./LedgerCombobox"
 import { Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -41,6 +42,8 @@ export function EditPaymentForm({
     // Expense and Liability ledgers
     const pureExpense = ledgers.filter(l => l.group.nature === "EXPENSE")
     const liabilities = ledgers.filter(l => l.group.nature === "LIABILITY" && !l.isSystem)
+    const cashAndBank = ledgers.filter(l => l.group.nature === "ASSET" && (l.group.name === "Cash" || l.group.name === "Bank Accounts"))
+
 
     async function onSubmit(data: PaymentInput) {
         setIsLoading(true)
@@ -98,16 +101,16 @@ export function EditPaymentForm({
                                 name="cashOrBank"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Pay From *</FormLabel>
+                                        <FormLabel>Payment Mode *</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Select account" />
+                                                    <SelectValue placeholder="Select mode" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="CASH">Cash in Hand</SelectItem>
-                                                <SelectItem value="BANK">Bank - Default</SelectItem>
+                                                <SelectItem value="CASH">Cash</SelectItem>
+                                                <SelectItem value="BANK">Bank</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -121,33 +124,15 @@ export function EditPaymentForm({
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Debit Account (Expense/Liability) *</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select ledger to debit" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectGroup>
-                                                    <SelectLabel>Expense Ledgers</SelectLabel>
-                                                    {pureExpense.map(l => (
-                                                        <SelectItem key={l.id} value={l.id}>
-                                                            {l.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectGroup>
-                                                {liabilities.length > 0 && (
-                                                    <SelectGroup>
-                                                        <SelectLabel>Liabilities</SelectLabel>
-                                                        {liabilities.map(l => (
-                                                            <SelectItem key={l.id} value={l.id}>
-                                                                {l.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectGroup>
-                                                )}
-                                            </SelectContent>
-                                        </Select>
+                                        <FormControl>
+                                            <LedgerCombobox
+                                                ledgers={[...pureExpense, ...liabilities]}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                placeholder="Choose account..."
+                                                showMemberCodesOnly={true}
+                                            />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}

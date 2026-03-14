@@ -15,10 +15,11 @@ import {
     Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form"
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { LedgerCombobox } from "./LedgerCombobox"
 import { Label } from "@/components/ui/label"
-import { Loader2, CheckCircle2 } from "lucide-react"
+import { Loader2, CheckCircle2, Info } from "lucide-react"
 import { DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
 
 import { useSearchParams } from "next/navigation"
@@ -46,7 +47,7 @@ export function ReceiptForm({
     const form = useForm<ReceiptInput>({
         resolver: zodResolver(receiptSchema),
         defaultValues: {
-            date: new Date().toISOString().split('T')[0],
+            date: "",
             amount: undefined,
             cashOrBank: "CASH",
             incomeLedgerId: preselectedLedgerId,
@@ -54,6 +55,10 @@ export function ReceiptForm({
             narration: "",
         },
     })
+
+    useEffect(() => {
+        form.setValue("date", new Date().toISOString().split('T')[0])
+    }, [form, preselectedLedgerId])
 
     useEffect(() => {
         if (autoFocusAmount && amountInputRef.current) {
@@ -183,23 +188,13 @@ export function ReceiptForm({
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Credit Account (Income) *</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select ledger to credit" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Income Ledgers</SelectLabel>
-                                            {incomeLedgers.map(l => (
-                                                <SelectItem key={l.id} value={l.id}>
-                                                    {l.name} {l.partyType === 'MEMBER' && l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                            <LedgerCombobox
+                                                ledgers={incomeLedgers}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                placeholder="Select income/party ledger"
+                                                showMemberCodesOnly={true}
+                                            />
                                 <FormMessage />
                             </FormItem>
                         )}

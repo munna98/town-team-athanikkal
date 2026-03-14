@@ -14,6 +14,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
+import { LedgerCombobox } from "./LedgerCombobox"
 
 interface Ledger {
     id: string
@@ -90,21 +91,13 @@ export function ReportFilters({ ledgers }: ReportFiltersProps) {
                     {currentType === "ledger-statement" && (
                         <div className="space-y-2 flex-1 min-w-[240px]">
                             <Label htmlFor="ledger" className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Select Ledger</Label>
-                            <div className="relative">
-                                <BookOpen className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 z-10" />
-                                <Select value={ledgerId} onValueChange={setLedgerId}>
-                                    <SelectTrigger className="pl-9">
-                                        <SelectValue placeholder="Choose a ledger..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {ledgers.map((l) => (
-                                            <SelectItem key={l.id} value={l.id}>
-                                                {l.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                            <LedgerCombobox
+                                ledgers={ledgers}
+                                value={ledgerId}
+                                onValueChange={setLedgerId}
+                                placeholder="Choose a ledger..."
+                                showMemberCodesOnly={true}
+                            />
                         </div>
                     )}
 

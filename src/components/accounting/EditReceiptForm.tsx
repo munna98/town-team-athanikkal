@@ -16,9 +16,10 @@ import {
     Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form"
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Loader2, ArrowLeft } from "lucide-react"
+import { LedgerCombobox } from "./LedgerCombobox"
+import { Loader2, ArrowLeft, Info } from "lucide-react"
 import Link from "next/link"
 
 export function EditReceiptForm({
@@ -121,23 +122,13 @@ export function EditReceiptForm({
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Credit Account (Income) *</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select ledger to credit" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectGroup>
-                                                    <SelectLabel>Income Ledgers</SelectLabel>
-                                                    {incomeLedgers.map(l => (
-                                                        <SelectItem key={l.id} value={l.id}>
-                                                            {l.name} {l.partyType === 'MEMBER' && l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectGroup>
-                                            </SelectContent>
-                                        </Select>
+                                            <LedgerCombobox
+                                                ledgers={incomeLedgers}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                placeholder="Select income/party ledger"
+                                                showMemberCodesOnly={true}
+                                            />
                                         <FormMessage />
                                     </FormItem>
                                 )}

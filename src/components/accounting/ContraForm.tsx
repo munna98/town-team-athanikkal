@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { contraSchema, ContraInput } from "@/types"
@@ -17,6 +17,7 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { LedgerCombobox } from "./LedgerCombobox"
 import { Loader2, ArrowRightLeft } from "lucide-react"
 
 export function ContraForm({ ledgers }: { ledgers: any[] }) {
@@ -25,13 +26,17 @@ export function ContraForm({ ledgers }: { ledgers: any[] }) {
     const form = useForm<ContraInput>({
         resolver: zodResolver(contraSchema),
         defaultValues: {
-            date: new Date().toISOString().split('T')[0],
+            date: "",
             amount: 0,
             fromLedgerId: "",
             toLedgerId: "",
             narration: "",
         },
     })
+
+    useEffect(() => {
+        form.setValue("date", new Date().toISOString().split('T')[0])
+    }, [form])
 
     // Contra is only between Cash and Bank accounts
     const liquidLedgers = ledgers.filter(l =>
@@ -113,18 +118,13 @@ export function ContraForm({ ledgers }: { ledgers: any[] }) {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="text-red-600 font-bold">From Account (CR) *</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger className="bg-white border-red-200">
-                                                        <SelectValue placeholder="Source" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {liquidLedgers.map(l => (
-                                                        <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <LedgerCombobox
+                                                ledgers={liquidLedgers}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                placeholder="Source"
+                                                className="bg-white border-red-200"
+                                            />
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -142,18 +142,13 @@ export function ContraForm({ ledgers }: { ledgers: any[] }) {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel className="text-emerald-600 font-bold">To Account (DR) *</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger className="bg-white border-emerald-200">
-                                                        <SelectValue placeholder="Destination" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    {liquidLedgers.map(l => (
-                                                        <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <LedgerCombobox
+                                                ledgers={liquidLedgers}
+                                                value={field.value}
+                                                onValueChange={field.onChange}
+                                                placeholder="Destination"
+                                                className="bg-white border-emerald-200"
+                                            />
                                             <FormMessage />
                                         </FormItem>
                                     )}

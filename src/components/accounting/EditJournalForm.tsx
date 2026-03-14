@@ -19,6 +19,7 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { LedgerCombobox } from "./LedgerCombobox"
 import { Loader2, ArrowLeft, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
 
@@ -135,20 +136,12 @@ export function EditJournalForm({
                                                 name={`lines.${index}.ledgerId`}
                                                 render={({ field }) => (
                                                     <FormItem className="space-y-0">
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger className="h-9">
-                                                                    <SelectValue placeholder="Select Ledger" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                {ledgers.map(l => (
-                                                                    <SelectItem key={l.id} value={l.id}>
-                                                                        {l.name} {l.partyType === 'MEMBER' && l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <LedgerCombobox
+                                                            ledgers={ledgers}
+                                                            value={field.value}
+                                                            onValueChange={field.onChange}
+                                                            placeholder="Select Ledger"
+                                                        />
                                                     </FormItem>
                                                 )}
                                             />

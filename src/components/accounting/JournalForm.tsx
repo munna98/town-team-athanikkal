@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { journalSchema, JournalInput } from "@/types"
@@ -18,6 +18,7 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
+import { LedgerCombobox } from "./LedgerCombobox"
 import { Loader2, Plus, Trash2 } from "lucide-react"
 
 export function JournalForm({ ledgers }: { ledgers: any[] }) {
@@ -26,7 +27,7 @@ export function JournalForm({ ledgers }: { ledgers: any[] }) {
     const form = useForm<JournalInput>({
         resolver: zodResolver(journalSchema),
         defaultValues: {
-            date: new Date().toISOString().split('T')[0],
+            date: "",
             narration: "",
             lines: [
                 { ledgerId: "", debit: 0, credit: 0 },
@@ -34,6 +35,10 @@ export function JournalForm({ ledgers }: { ledgers: any[] }) {
             ],
         },
     })
+
+    useEffect(() => {
+        form.setValue("date", new Date().toISOString().split('T')[0])
+    }, [form])
 
     const { fields, append, remove } = useFieldArray({
         name: "lines",
@@ -130,20 +135,12 @@ export function JournalForm({ ledgers }: { ledgers: any[] }) {
                                                 name={`lines.${index}.ledgerId`}
                                                 render={({ field }) => (
                                                     <FormItem className="space-y-0">
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger className="h-9">
-                                                                    <SelectValue placeholder="Select Ledger" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                {ledgers.map(l => (
-                                                                    <SelectItem key={l.id} value={l.id}>
-                                                                        {l.name} {l.partyType === 'MEMBER' && l.code && !l.name.includes(l.code) ? `(${l.code})` : ""}
-                                                                    </SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <LedgerCombobox
+                                                            ledgers={ledgers}
+                                                            value={field.value}
+                                                            onValueChange={field.onChange}
+                                                            placeholder="Select Ledger"
+                                                        />
                                                     </FormItem>
                                                 )}
                                             />
