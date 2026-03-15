@@ -220,53 +220,55 @@ export function MemberForm({
                             </div>
 
                             <div className="md:col-span-2 space-y-4">
-                                <FormField
-                                    control={form.control}
-                                    name="isExecutive"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-row items-center gap-3 p-4 border rounded-lg">
-                                            <FormControl className="mt-[2px]">
-                                                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                                            </FormControl>
-                                            <div className="space-y-1 leading-none">
-                                                <FormLabel>Executive Committee Member</FormLabel>
-                                                <p className="text-sm text-muted-foreground">This member will appear on the public landing page and can be granted login access.</p>
-                                            </div>
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {form.watch("isExecutive") && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <FormField
                                         control={form.control}
-                                        name="position"
+                                        name="isExecutive"
                                         render={({ field }) => (
-                                            <FormItem className="pl-10">
-                                                <FormLabel>Position / Title</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="e.g. President, Secretary" {...field} />
+                                            <FormItem className="flex flex-row items-center gap-3 p-2 border rounded-lg h-[50px]">
+                                                <FormControl className="mt-[2px]">
+                                                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                                                 </FormControl>
-                                                <FormMessage />
+                                                <div className="space-y-1 leading-none">
+                                                    <FormLabel>Executive Committee Member</FormLabel>
+                                                </div>
                                             </FormItem>
                                         )}
                                     />
-                                )}
 
-                                <FormField
-                                    control={form.control}
-                                    name="isActive"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-row items-center gap-3 p-4 border rounded-lg">
-                                            <FormControl className="mt-[2px]">
-                                                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                                            </FormControl>
-                                            <div className="space-y-1 leading-none">
-                                                <FormLabel>Active Member Status</FormLabel>
-                                                <p className="text-sm text-muted-foreground">Inactive members will be hidden from default views and public pages.</p>
-                                            </div>
-                                        </FormItem>
-                                    )}
-                                />
+                                    <FormField
+                                        control={form.control}
+                                        name="isActive"
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-row items-center gap-3 p-2 border rounded-lg h-[50px]">
+                                                <FormControl className="mt-[2px]">
+                                                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                                </FormControl>
+                                                <div className="space-y-1 leading-none">
+                                                    <FormLabel>Active Member Status</FormLabel>
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                {form.watch("isExecutive") && (
+                                    <div className="md:w-1/2">
+                                        <FormField
+                                            control={form.control}
+                                            name="position"
+                                            render={({ field }) => (
+                                                <FormItem className="pl-10">
+                                                    <FormLabel>Position / Title</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g. President, Secretary" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="md:col-span-2 border-t pt-4">
