@@ -94,7 +94,7 @@ export default async function LandingPage() {
                         </h1>
 
                         <p className="landing-fade-in landing-fade-in-delay-2 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                            The premier football club of Athanikkal — uniting passion on the pitch
+                            The premier sports club of Athanikkal — uniting passion on the pitch
                             with excellence in community since day one.
                         </p>
 
@@ -132,7 +132,7 @@ export default async function LandingPage() {
                             </span>
                         </h2>
                         <p className="text-slate-400 text-lg max-w-3xl mx-auto leading-relaxed mb-12">
-                            Town Team Athanikkal is more than a football club — it&apos;s a brotherhood that thrives on
+                            Town Team Athanikkal is more than a sports club — it&apos;s a brotherhood that thrives on
                             sportsmanship, discipline, and community. From local tournaments to regional glory,
                             we bring the spirit of Athanikkal to every match we play.
                         </p>

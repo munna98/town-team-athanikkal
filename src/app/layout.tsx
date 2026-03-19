@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: "Town Team Athanikkal",
-  description: "Football Club Management System",
+  description: "Sports Club Management System",
 };
 
 export default function RootLayout({
