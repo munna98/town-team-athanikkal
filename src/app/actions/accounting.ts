@@ -441,3 +441,47 @@ export async function updateJournal(id: string, data: z.infer<typeof journalSche
         return { error: error.message || "Failed to update journal" }
     }
 }
+
+// ─── Delete Transaction ───────────────────────────────────────────────────────
+
+export async function deleteTransaction(id: string) {
+    const session = await auth()
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    try {
+        // 1. Find existing transaction to see which members are involved
+        const oldTransaction = await prisma.transaction.findUnique({
+            where: { id },
+            include: { lines: { include: { ledger: true } } }
+        })
+        if (!oldTransaction) throw new Error("Transaction not found")
+
+        const oldMemberIds = oldTransaction.lines
+            .map(l => l.ledger?.memberId)
+            .filter(Boolean) as string[]
+        const uniqueMemberIds = Array.from(new Set(oldMemberIds))
+
+        // 2. Delete lines and transaction in a transaction to ensure integrity
+        await prisma.$transaction([
+            prisma.transactionLine.deleteMany({ where: { transactionId: id } }),
+            prisma.transaction.delete({ where: { id } })
+        ])
+
+        // 3. Recalculate status for the old members
+        for (const mid of uniqueMemberIds) {
+            await recalculateMemberStatus(mid)
+        }
+
+        // Revalidate all accounting related paths
+        revalidatePath("/admin/accounting/receipts")
+        revalidatePath("/admin/accounting/payments")
+        revalidatePath("/admin/accounting/contra")
+        revalidatePath("/admin/accounting/journal")
+        revalidatePath("/admin/accounting/reports")
+        revalidatePath("/admin/members")
+        
+        return { success: true }
+    } catch (error: any) {
+        return { error: error.message || "Failed to delete transaction" }
+    }
+}

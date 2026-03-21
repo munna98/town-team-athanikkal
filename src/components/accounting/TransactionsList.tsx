@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from "react"
-import { getTransactions } from "@/app/actions/accounting"
+import { getTransactions, deleteTransaction } from "@/app/actions/accounting"
 import { formatCurrency } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,9 +10,21 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, Search, Pencil, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft } from "lucide-react"
+import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft } from "lucide-react"
 import { DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
 import Link from "next/link"
+import { toast } from "sonner"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type TxType = "RECEIPT" | "PAYMENT" | "CONTRA" | "JOURNAL"
 
@@ -187,6 +199,43 @@ export function TransactionsList({ type, editBasePath, showPdf = false }: Props)
                                                                         <Pencil className="h-3 w-3" />
                                                                     </Button>
                                                                 </Link>
+                                                                <AlertDialog>
+                                                                    <AlertDialogTrigger asChild>
+                                                                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50" title="Delete Transaction">
+                                                                            <Trash2 className="h-3 w-3" />
+                                                                        </Button>
+                                                                    </AlertDialogTrigger>
+                                                                    <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                                                                        <AlertDialogHeader>
+                                                                            <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
+                                                                            <AlertDialogDescription>
+                                                                                This will permanently delete transaction <strong>{txn.referenceNo}</strong>. This action cannot be undone.
+                                                                            </AlertDialogDescription>
+                                                                        </AlertDialogHeader>
+                                                                        <AlertDialogFooter>
+                                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                            <AlertDialogAction
+                                                                                className="bg-rose-600 hover:bg-rose-700 text-white"
+                                                                                onClick={async (e) => {
+                                                                                    e.stopPropagation();
+                                                                                    try {
+                                                                                        const res = await deleteTransaction(txn.id);
+                                                                                        if (res.error) {
+                                                                                            toast.error(res.error);
+                                                                                        } else {
+                                                                                            toast.success("Transaction deleted successfully");
+                                                                                            load();
+                                                                                        }
+                                                                                    } catch (err: any) {
+                                                                                        toast.error("An error occurred");
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                Delete
+                                                                            </AlertDialogAction>
+                                                                        </AlertDialogFooter>
+                                                                    </AlertDialogContent>
+                                                                </AlertDialog>
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>
