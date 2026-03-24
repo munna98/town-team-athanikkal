@@ -60,9 +60,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             balanceAmount,
         })
 
-        const buffer = await renderToBuffer(pdfElement)
+        const buffer = await renderToBuffer(pdfElement as any)
 
-        return new NextResponse(buffer, {
+        return new NextResponse(buffer as any, {
             status: 200,
             headers: {
                 "Content-Type": "application/pdf",
