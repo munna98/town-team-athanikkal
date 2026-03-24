@@ -147,7 +147,42 @@ export function BulkImportDialog({ iconOnly = false }: { iconOnly?: boolean }) {
                             return
                         }
 
-                        mapped[key as keyof ImportMemberRow] = value !== undefined ? String(value) : ""
+                        const normalizedValue = value !== undefined ? String(value) : ""
+
+                        switch (key) {
+                            case "name":
+                                mapped.name = normalizedValue
+                                break
+                            case "address1":
+                                mapped.address1 = normalizedValue
+                                break
+                            case "address2":
+                                mapped.address2 = normalizedValue
+                                break
+                            case "address3":
+                                mapped.address3 = normalizedValue
+                                break
+                            case "aadhaarNo":
+                                mapped.aadhaarNo = normalizedValue
+                                break
+                            case "mobile":
+                                mapped.mobile = normalizedValue
+                                break
+                            case "email":
+                                mapped.email = normalizedValue
+                                break
+                            case "dob":
+                                mapped.dob = normalizedValue
+                                break
+                            case "bloodGroup":
+                                mapped.bloodGroup = normalizedValue
+                                break
+                            case "position":
+                                mapped.position = normalizedValue
+                                break
+                            default:
+                                break
+                        }
                     })
                     return mapped
                 })

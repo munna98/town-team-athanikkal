@@ -3,12 +3,24 @@
 import { auth } from "@/lib/auth"
 import { bulkCreateMembers as bulkCreateMembersLib } from "@/lib/membership"
 import prisma from "@/lib/prisma"
-import { createMemberSchema, CreateMemberInput } from "@/types"
+import { createMemberSchema } from "@/types"
 import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
 
-type BulkMemberImportRow = Partial<CreateMemberInput> & {
+type BulkMemberImportRow = {
+    name?: string
+    address1?: string
+    address2?: string
+    address3?: string
     aadhaarNo?: string
+    mobile?: string
+    email?: string
+    dob?: string
+    bloodGroup?: string
+    isExecutive?: boolean
+    position?: string
+    photoUrl?: string
+    isActive?: boolean
     __rowNumber?: number
 }
 
