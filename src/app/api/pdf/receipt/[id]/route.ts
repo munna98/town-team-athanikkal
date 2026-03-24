@@ -34,10 +34,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
         // Find the credit line (income/party side)
         const creditLine = transaction.lines.find(l => Number(l.credit) > 0)
-        const creditAccountName = creditLine?.ledger.name || "Unknown"
-
         // Get member info from the credited ledger's linked member (if any)
         const linkedMember = creditLine?.ledger.member
+        const basicTier = await prisma.tier.findUnique({
+            where: { name: "BASIC" },
+            select: { threshold: true },
+        })
+        const basicTierThreshold = Number(basicTier?.threshold ?? 10000)
+        const balanceAmount = linkedMember
+            ? Math.max(0, basicTierThreshold - Number(linkedMember.totalPaid || 0))
+            : null
 
         const requestUrl = new URL(req.url)
         const logoUrl = `${requestUrl.protocol}//${requestUrl.host}/logo.png`
@@ -50,23 +56,23 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             memberCode: linkedMember?.membershipCode,
             narration: transaction.narration,
             amount: Number(transaction.totalAmount),
-            cashOrBank: transaction.lines.some(l => l.ledger.code === "1001" && Number(l.debit) > 0) ? "CASH" : "BANK",
             collectedBy: transaction.collectedBy?.name || "N/A",
-            creditAccount: creditAccountName,
+            balanceAmount,
         })
 
-        const buffer = await renderToBuffer(pdfElement as any)
+        const buffer = await renderToBuffer(pdfElement)
 
-        return new NextResponse(buffer as any, {
+        return new NextResponse(buffer, {
             status: 200,
             headers: {
                 "Content-Type": "application/pdf",
                 "Content-Disposition": `attachment; filename="receipt-${transaction.referenceNo}.pdf"`,
             },
         })
-    } catch (error: any) {
+    } catch (error) {
         console.error("Receipt PDF error:", error)
-        return NextResponse.json({ error: error.message || "Failed to generate PDF" }, { status: 500 })
+        const message = error instanceof Error ? error.message : "Failed to generate PDF"
+        return NextResponse.json({ error: message }, { status: 500 })
     }
 }
 

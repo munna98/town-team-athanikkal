@@ -176,9 +176,8 @@ interface ReceiptPDFProps {
     memberCode?: string
     narration: string
     amount: number
-    cashOrBank: string
     collectedBy: string
-    creditAccount: string
+    balanceAmount?: number | null
 }
 
 export function ReceiptPDF({
@@ -189,9 +188,8 @@ export function ReceiptPDF({
     memberCode,
     narration,
     amount,
-    cashOrBank,
     collectedBy,
-    creditAccount,
+    balanceAmount,
 }: ReceiptPDFProps) {
     const formattedDate = new Date(date).toLocaleDateString("en-IN", {
         day: "2-digit",
@@ -257,7 +255,9 @@ export function ReceiptPDF({
                     </View>
                     <Text style={styles.italicText}> Balance Amount </Text>
                     <View style={[styles.valueContainer, { flex: 0.5 }]}>
-                        <Text style={styles.valueText}></Text>
+                        <Text style={styles.valueText}>
+                            {typeof balanceAmount === "number" ? balanceAmount.toLocaleString("en-IN") : ""}
+                        </Text>
                     </View>
                 </View>
 

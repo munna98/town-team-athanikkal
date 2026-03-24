@@ -270,7 +270,7 @@ export default async function LandingPage() {
                                     </div>
                                     <div>
                                         <p className="text-white text-sm font-bold">WhatsApp</p>
-                                        <p className="text-slate-500 text-xs">+91 89213 30458</p>
+                                        <p className="text-slate-500 text-xs">+91 8129908687</p>
                                     </div>
                                 </a>
                             </div>
