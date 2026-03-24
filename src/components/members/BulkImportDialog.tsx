@@ -127,7 +127,7 @@ export function BulkImportDialog({ iconOnly = false }: { iconOnly?: boolean }) {
                         let value = row[header]
                         
                         // Transform Blood Group
-                        if (key === "bloodGroup" && value) {
+                        if (key === "bloodGroup" && typeof value === "string") {
                             value = BLOOD_GROUP_MAP[value] || value
                         }
                         
