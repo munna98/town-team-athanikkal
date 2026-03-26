@@ -10,6 +10,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { ReceiptText, Plus } from "lucide-react"
 import { ReceiptForm } from "../accounting/ReceiptForm"
 
@@ -19,7 +20,7 @@ interface MemberReceiptDialogProps {
     ledgerId: string
     ledgers: any[]
     executives: any[]
-    triggerVariant?: "button" | "icon" | "link"
+    triggerVariant?: "button" | "icon" | "link" | "menu"
 }
 
 export function MemberReceiptDialog({
@@ -39,6 +40,11 @@ export function MemberReceiptDialog({
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-emerald-600" title="Direct Receipt">
                         <ReceiptText className="h-4 w-4" />
                     </Button>
+                ) : triggerVariant === "menu" ? (
+                    <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
+                        <ReceiptText className="h-4 w-4" />
+                        Record Receipt
+                    </DropdownMenuItem>
                 ) : triggerVariant === "link" ? (
                     <Button variant="link" className="text-sky-600">
                         Record a Receipt

@@ -14,6 +14,13 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
     Select,
     SelectContent,
     SelectItem,
@@ -21,7 +28,7 @@ import {
     SelectValue
 } from "@/components/ui/select"
 import { formatCurrency, bloodGroupLabels } from "@/lib/utils"
-import { Search, Plus, Loader2, Eye, FileEdit } from "lucide-react"
+import { Search, Plus, Loader2, Eye, FileEdit, MoreVertical } from "lucide-react"
 import { BulkImportDialog } from "./BulkImportDialog"
 import { MemberReceiptDialog } from "./MemberReceiptDialog"
 
@@ -222,27 +229,39 @@ export function MemberTable() {
                                         </div>
                                     </div>
 
-                                    <div className="flex shrink-0 gap-1">
-                                        {member.ledger?.id && (
-                                            <MemberReceiptDialog
-                                                memberId={member.id}
-                                                memberName={member.name}
-                                                ledgerId={member.ledger.id}
-                                                ledgers={ledgers}
-                                                executives={executives}
-                                                triggerVariant="icon"
-                                            />
-                                        )}
-                                        <Link href={`/admin/members/${member.id}`}>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-sky-600">
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
-                                        </Link>
-                                        <Link href={`/admin/members/${member.id}/edit`}>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-sky-600">
-                                                <FileEdit className="h-4 w-4" />
-                                            </Button>
-                                        </Link>
+                                    <div className="shrink-0">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-sky-600">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-44">
+                                                {member.ledger?.id && (
+                                                    <MemberReceiptDialog
+                                                        memberId={member.id}
+                                                        memberName={member.name}
+                                                        ledgerId={member.ledger.id}
+                                                        ledgers={ledgers}
+                                                        executives={executives}
+                                                        triggerVariant="menu"
+                                                    />
+                                                )}
+                                                {member.ledger?.id && <DropdownMenuSeparator />}
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={`/admin/members/${member.id}`}>
+                                                        <Eye className="h-4 w-4" />
+                                                        View Member
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={`/admin/members/${member.id}/edit`}>
+                                                        <FileEdit className="h-4 w-4" />
+                                                        Edit Member
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 </div>
 
