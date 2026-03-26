@@ -268,10 +268,12 @@ export async function getLedgerGroupReport(groupId: string, from?: Date, to?: Da
         })
     )
 
-    const openingSignedTotal = ledgers.reduce((sum, ledger) => sum + ledger.openingSigned, 0)
-    const totalDebit = ledgers.reduce((sum, ledger) => sum + ledger.totalDebit, 0)
-    const totalCredit = ledgers.reduce((sum, ledger) => sum + ledger.totalCredit, 0)
-    const closingSignedTotal = ledgers.reduce((sum, ledger) => sum + ledger.closingBalance, 0)
+    const ledgersWithTransactions = ledgers.filter((ledger) => ledger.transactionCount > 0)
+
+    const openingSignedTotal = ledgersWithTransactions.reduce((sum, ledger) => sum + ledger.openingSigned, 0)
+    const totalDebit = ledgersWithTransactions.reduce((sum, ledger) => sum + ledger.totalDebit, 0)
+    const totalCredit = ledgersWithTransactions.reduce((sum, ledger) => sum + ledger.totalCredit, 0)
+    const closingSignedTotal = ledgersWithTransactions.reduce((sum, ledger) => sum + ledger.closingBalance, 0)
 
     return {
         group: {
@@ -280,7 +282,7 @@ export async function getLedgerGroupReport(groupId: string, from?: Date, to?: Da
             nature: group.nature,
             description: group.description,
         },
-        ledgers,
+        ledgers: ledgersWithTransactions,
         summary: {
             openingBalance: Math.abs(openingSignedTotal),
             openingType: openingSignedTotal >= 0 ? "DR" : "CR",
@@ -288,13 +290,7 @@ export async function getLedgerGroupReport(groupId: string, from?: Date, to?: Da
             totalCredit,
             closingBalance: Math.abs(closingSignedTotal),
             closingType: closingSignedTotal >= 0 ? "DR" : "CR",
-            ledgerCount: ledgers.length,
-            activeLedgerCount: ledgers.filter(
-                (ledger) =>
-                    ledger.openingBalance !== 0 ||
-                    ledger.totalDebit !== 0 ||
-                    ledger.totalCredit !== 0
-            ).length,
+            ledgerCount: ledgersWithTransactions.length,
         },
     }
 }

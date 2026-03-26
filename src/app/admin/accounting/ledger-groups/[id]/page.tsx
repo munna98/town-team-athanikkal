@@ -97,7 +97,7 @@ export default async function LedgerGroupReportPage({
                 currentTo={resolvedSearchParams.to}
             />
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <Card className="border-slate-200 shadow-sm">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm text-slate-500">Opening Balance</CardTitle>
@@ -138,16 +138,6 @@ export default async function LedgerGroupReportPage({
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-slate-200 shadow-sm">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-slate-500">Active Ledgers</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-slate-900">
-                            {report.summary.activeLedgerCount}/{report.summary.ledgerCount}
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
 
             <Card className="overflow-hidden border-slate-200 shadow-sm">
@@ -172,7 +162,7 @@ export default async function LedgerGroupReportPage({
                             {report.ledgers.length === 0 && (
                                 <TableRow>
                                     <TableCell colSpan={8} className="py-10 text-center text-slate-500">
-                                        No ledgers found in this group.
+                                        No ledgers with transactions were found in this period.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -239,3 +229,4 @@ export default async function LedgerGroupReportPage({
         </div>
     )
 }
+
