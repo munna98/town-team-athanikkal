@@ -56,6 +56,7 @@ const accountingNavItems = [
         items: [
             { title: "Trial Balance", url: "/admin/accounting/reports?type=trial-balance" },
             { title: "Ledger Statement", url: "/admin/accounting/reports?type=ledger-statement" },
+            { title: "Ledger Groups", url: "/admin/accounting/ledger-groups" },
             { title: "Income & Expenditure", url: "/admin/accounting/reports?type=income" },
             { title: "Balance Sheet", url: "/admin/accounting/reports?type=balance-sheet" },
         ]
@@ -83,7 +84,10 @@ export function AppSidebar() {
     const { data: session } = useSession()
     const currentUserRole = session?.user?.role
     const { setOpenMobile, isMobile } = useSidebar()
-    const [reportsOpen, setReportsOpen] = useState(pathname.startsWith("/admin/accounting/reports"))
+    const [reportsOpen, setReportsOpen] = useState(
+        pathname.startsWith("/admin/accounting/reports") ||
+        pathname.startsWith("/admin/accounting/ledger-groups")
+    )
     const [settingsOpen, setSettingsOpen] = useState(pathname.startsWith("/admin/settings") || pathname.startsWith("/admin/systems"))
 
     const filteredSettingsNavItems = settingsNavItems.map(item => {
@@ -144,7 +148,10 @@ export function AppSidebar() {
                                         <>
                                             <SidebarMenuButton
                                                 onClick={() => setReportsOpen(!reportsOpen)}
-                                                isActive={pathname.startsWith(item.url)}
+                                                isActive={
+                                                    pathname.startsWith(item.url) ||
+                                                    pathname.startsWith("/admin/accounting/ledger-groups")
+                                                }
                                             >
                                                 <item.icon />
                                                 <span>{item.title}</span>
@@ -155,7 +162,9 @@ export function AppSidebar() {
                                                     {item.items.map((subItem) => {
                                                         const subItemUrl = new URL(subItem.url, "http://localhost")
                                                         const subItemType = subItemUrl.searchParams.get("type")
-                                                        const isActive = pathname === subItemUrl.pathname && currentType === subItemType
+                                                        const isActive = subItemType
+                                                            ? pathname === subItemUrl.pathname && currentType === subItemType
+                                                            : pathname.startsWith(subItemUrl.pathname)
 
                                                         return (
                                                             <SidebarMenuSubItem key={subItem.title}>

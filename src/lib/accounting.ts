@@ -231,6 +231,74 @@ export async function getLedgerStatement(ledgerId: string, from?: Date, to?: Dat
 
 // ─── Income & Expenditure ────────────────────────────────
 
+export async function getLedgerGroupReport(groupId: string, from?: Date, to?: Date) {
+    const group = await prisma.ledgerGroup.findUnique({
+        where: { id: groupId },
+        include: {
+            ledgers: {
+                orderBy: { code: "asc" },
+            },
+        },
+    })
+
+    if (!group) throw new Error("Ledger group not found")
+
+    const ledgers = await Promise.all(
+        group.ledgers.map(async (ledger) => {
+            const statement = await getLedgerStatement(ledger.id, from, to)
+            const totalDebit = statement.statement.reduce((sum, line) => sum + line.debit, 0)
+            const totalCredit = statement.statement.reduce((sum, line) => sum + line.credit, 0)
+            const openingSigned =
+                statement.openingType === "DR"
+                    ? statement.openingBalance
+                    : -statement.openingBalance
+
+            return {
+                id: ledger.id,
+                name: ledger.name,
+                code: ledger.code,
+                openingBalance: statement.openingBalance,
+                openingType: statement.openingType,
+                openingSigned,
+                totalDebit,
+                totalCredit,
+                closingBalance: statement.closingBalance,
+                transactionCount: statement.statement.length,
+            }
+        })
+    )
+
+    const openingSignedTotal = ledgers.reduce((sum, ledger) => sum + ledger.openingSigned, 0)
+    const totalDebit = ledgers.reduce((sum, ledger) => sum + ledger.totalDebit, 0)
+    const totalCredit = ledgers.reduce((sum, ledger) => sum + ledger.totalCredit, 0)
+    const closingSignedTotal = ledgers.reduce((sum, ledger) => sum + ledger.closingBalance, 0)
+
+    return {
+        group: {
+            id: group.id,
+            name: group.name,
+            nature: group.nature,
+            description: group.description,
+        },
+        ledgers,
+        summary: {
+            openingBalance: Math.abs(openingSignedTotal),
+            openingType: openingSignedTotal >= 0 ? "DR" : "CR",
+            totalDebit,
+            totalCredit,
+            closingBalance: Math.abs(closingSignedTotal),
+            closingType: closingSignedTotal >= 0 ? "DR" : "CR",
+            ledgerCount: ledgers.length,
+            activeLedgerCount: ledgers.filter(
+                (ledger) =>
+                    ledger.openingBalance !== 0 ||
+                    ledger.totalDebit !== 0 ||
+                    ledger.totalCredit !== 0
+            ).length,
+        },
+    }
+}
+
 export async function getIncomeExpenditure(from?: Date, to?: Date) {
     const trialBalance = await getTrialBalance(from, to)
 

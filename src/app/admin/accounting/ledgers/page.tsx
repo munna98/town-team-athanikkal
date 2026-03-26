@@ -1,11 +1,8 @@
 import { LedgerForm } from "@/components/accounting/LedgerForm"
 import prisma from "@/lib/prisma"
-import { formatCurrency } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { getLedgerBalance } from "@/lib/accounting"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { FileText } from "lucide-react"
+import { FileText, FolderKanban } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
@@ -46,7 +43,7 @@ export default async function LedgersPage() {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Chart of Accounts</h1>
-                    <p className="text-slate-500">Manage all ledgers and view their statements.</p>
+                    <p className="text-slate-500">Manage all ledgers and open both statement and group-level reports.</p>
                 </div>
                 <LedgerForm groups={groups} />
             </div>
@@ -73,9 +70,21 @@ export default async function LedgersPage() {
                                         <div className="grid grid-cols-12 items-center px-6 py-2 hover:bg-slate-100 transition group/row border-b border-dashed">
                                             <div className="col-span-2"></div>
                                             <div className="col-span-8 flex items-center gap-2">
-                                                <div className="font-bold text-slate-700">{group.name}</div>
+                                                <Link
+                                                    href={`/admin/accounting/ledger-groups/${group.id}`}
+                                                    className="inline-flex items-center gap-2 font-bold text-slate-700 hover:text-sky-700"
+                                                >
+                                                    <FolderKanban className="h-4 w-4 text-slate-400" />
+                                                    {group.name}
+                                                </Link>
                                             </div>
-                                            <div className="col-span-2"></div>
+                                            <div className="col-span-2 text-right">
+                                                <Button asChild variant="ghost" size="sm" className="h-7 text-sky-600">
+                                                    <Link href={`/admin/accounting/ledger-groups/${group.id}`}>
+                                                        Group Report
+                                                    </Link>
+                                                </Button>
+                                            </div>
                                         </div>
 
                                         {/* Ledgers under this group */}
