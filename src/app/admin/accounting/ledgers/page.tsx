@@ -87,7 +87,7 @@ export default async function LedgersPage() {
                                                         <div className="font-medium text-slate-800">{ledger.name}</div>
                                                     </div>
                                                     <div className="col-span-2 text-right">
-                                                        <Link href={`/admin/accounting/reports?ledger=${ledger.id}`}>
+                                                        <Link href={`/admin/accounting/reports?type=ledger-statement&ledger=${ledger.id}`}>
                                                             <Button variant="ghost" size="sm" className="h-7 text-sky-600 opacity-0 group-hover/ledger:opacity-100 transition-opacity pointer-events-auto">
                                                                 <FileText className="w-3.5 h-3.5 mr-1" /> View Statement
                                                             </Button>
