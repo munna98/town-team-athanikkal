@@ -92,7 +92,7 @@ export function MemberTable() {
     }
 
     return (
-        <div className="space-y-4">
+        <div className="max-w-full space-y-4 overflow-x-hidden">
             <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                 <div className="grid w-full gap-2 sm:grid-cols-2 xl:flex xl:w-auto xl:flex-row xl:items-center">
                     <div className="relative w-full sm:col-span-2 xl:w-64">
@@ -164,7 +164,7 @@ export function MemberTable() {
                 </div>
             </div>
 
-            <div className="grid gap-3 md:hidden">
+            <div className="grid max-w-full gap-3 md:hidden">
                 {loading ? (
                     <div className="flex h-40 items-center justify-center rounded-md border bg-white">
                         <Loader2 className="h-6 w-6 animate-spin text-sky-500" />
@@ -198,10 +198,10 @@ export function MemberTable() {
                         return (
                             <div
                                 key={member.id}
-                                className={`rounded-xl border bg-white p-4 shadow-sm ${!member.isActive ? "bg-slate-50/60" : ""}`}
+                                className={`w-full max-w-full overflow-hidden rounded-xl border bg-white p-4 shadow-sm ${!member.isActive ? "bg-slate-50/60" : ""}`}
                             >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="flex min-w-0 items-center gap-3">
+                                <div className="relative max-w-full pr-10">
+                                    <div className="flex min-w-0 max-w-full items-center gap-3">
                                         <div className="h-10 w-10 rounded-full overflow-hidden bg-slate-100 shrink-0 flex items-center justify-center">
                                             {member.photoUrl ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
@@ -229,7 +229,7 @@ export function MemberTable() {
                                         </div>
                                     </div>
 
-                                    <div className="shrink-0">
+                                    <div className="absolute right-0 top-0">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-sky-600">
@@ -265,22 +265,22 @@ export function MemberTable() {
                                     </div>
                                 </div>
 
-                                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                                    <div className="rounded-lg bg-slate-50 px-3 py-2">
+                                <div className="mt-4 grid max-w-full grid-cols-2 gap-3 text-sm">
+                                    <div className="min-w-0 rounded-lg bg-slate-50 px-3 py-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-500">Mobile</p>
-                                        <p className="mt-1 font-medium text-slate-800">{member.mobile}</p>
+                                        <p className="mt-1 truncate font-medium text-slate-800">{member.mobile}</p>
                                     </div>
-                                    <div className="rounded-lg bg-slate-50 px-3 py-2">
+                                    <div className="min-w-0 rounded-lg bg-slate-50 px-3 py-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-500">Blood Group</p>
                                         <p className="mt-1 font-medium text-slate-800">{bloodGroupLabels[member.bloodGroup]}</p>
                                     </div>
-                                    <div className="rounded-lg bg-slate-50 px-3 py-2">
+                                    <div className="min-w-0 rounded-lg bg-slate-50 px-3 py-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-500">Total Paid</p>
-                                        <p className="mt-1 font-semibold text-slate-900">{formatCurrency(member.totalPaid)}</p>
+                                        <p className="mt-1 truncate font-semibold text-slate-900">{formatCurrency(member.totalPaid)}</p>
                                     </div>
-                                    <div className="rounded-lg bg-slate-50 px-3 py-2">
+                                    <div className="min-w-0 rounded-lg bg-slate-50 px-3 py-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-500">Balance</p>
-                                        <p className={`mt-1 font-semibold ${isMaxTier ? "text-slate-500" : "text-orange-500"}`}>
+                                        <p className={`mt-1 truncate font-semibold ${isMaxTier ? "text-slate-500" : "text-orange-500"}`}>
                                             {isMaxTier ? "Nil" : formatCurrency(balanceToNext)}
                                         </p>
                                     </div>
