@@ -186,15 +186,15 @@ export function ReceiptForm({
                         control={form.control}
                         name="incomeLedgerId"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="min-w-0">
                                 <FormLabel>Credit Account (Income) *</FormLabel>
-                                            <LedgerCombobox
-                                                ledgers={incomeLedgers}
-                                                value={field.value}
-                                                onValueChange={field.onChange}
-                                                placeholder="Select income/party ledger"
-                                                showMemberCodesOnly={true}
-                                            />
+                                <LedgerCombobox
+                                    ledgers={incomeLedgers}
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    placeholder="Select income/party ledger"
+                                    showMemberCodesOnly={true}
+                                />
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -204,7 +204,7 @@ export function ReceiptForm({
                         control={form.control}
                         name="amount"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="min-w-0">
                                 <FormLabel>Amount (₹) *</FormLabel>
                                 <FormControl>
                                     <Input 

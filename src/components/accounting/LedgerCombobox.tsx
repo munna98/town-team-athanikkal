@@ -68,10 +68,10 @@ export function LedgerCombobox({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className={cn("w-full justify-between font-normal", className)}
+                    className={cn("w-full min-w-0 justify-between font-normal", className)}
                     disabled={disabled}
                 >
-                    <span className="truncate">
+                    <span className="min-w-0 flex-1 truncate text-left">
                         {selectedLedger ? getDisplayName(selectedLedger) : placeholder}
                     </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
