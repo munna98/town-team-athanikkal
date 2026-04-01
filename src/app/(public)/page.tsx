@@ -108,14 +108,9 @@ export default async function LandingPage() {
                                 </Button>
                             </Link>
                             <Link href="/members">
-                                <Button size="lg" className="bg-transparent border border-amber-400/40 text-amber-400 hover:bg-amber-500/10 hover:border-amber-400/60 rounded-full px-8 h-12 font-semibold backdrop-blur-sm w-full sm:w-auto transition-all">
+                                <Button size="lg" className="bg-transparent border border-cyan-400/40 text-white hover:bg-cyan-500/10 hover:border-cyan-400/60 rounded-full px-8 h-12 font-semibold backdrop-blur-sm w-full sm:w-auto">
                                     <Users className="mr-2 w-4 h-4" />
                                     See our Members
-                                </Button>
-                            </Link>
-                            <Link href="#about">
-                                <Button size="lg" className="bg-transparent border border-cyan-400/40 text-white hover:bg-cyan-500/10 hover:border-cyan-400/60 rounded-full px-8 h-12 font-semibold backdrop-blur-sm w-full sm:w-auto">
-                                    Learn More
                                 </Button>
                             </Link>
                         </div>

@@ -1,8 +1,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Users, UserRound, Crown } from "lucide-react"
+import { ArrowLeft, Users, Crown } from "lucide-react"
 import prisma from "@/lib/prisma"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export const dynamic = 'force-dynamic'
 
@@ -136,20 +137,13 @@ export default async function MembersPage() {
                                 <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-6 gap-y-10">
                                     {tier.members.map(member => (
                                         <div key={member.id} className="group flex flex-col items-center">
-                                            <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 border-[3px] ${style.border} bg-[#0a101d] transition-transform duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-white/5 relative flex items-center justify-center`}>
-                                                {member.photoUrl ? (
-                                                    <Image
-                                                        src={member.photoUrl}
-                                                        alt={member.name}
-                                                        fill
-                                                        unoptimized
-                                                        className="object-cover"
-                                                    />
-                                                ) : (
-                                                    <UserRound className="w-10 h-10 text-slate-600 group-hover:text-slate-500 transition-colors" />
-                                                )}
-                                            </div>
-                                            <p className={`text-white font-medium text-xs sm:text-sm text-center leading-tight line-clamp-2 px-1 group-hover:${style.text.replace('text-', '')} transition-colors`}>
+                                            <Avatar className={`w-20 h-20 sm:w-24 sm:h-24 mb-3 border-[3px] ${style.border} transition-transform duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-white/5`}>
+                                                <AvatarImage src={member.photoUrl || ""} alt={member.name} className="object-cover" />
+                                                <AvatarFallback className="bg-[#0a101d] text-slate-400 font-semibold text-xl">
+                                                    {member.name.substring(0, 2).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <p className="text-white font-medium text-xs sm:text-sm text-center leading-tight line-clamp-2 px-1 transition-colors">
                                                 {member.name}
                                             </p>
                                         </div>
