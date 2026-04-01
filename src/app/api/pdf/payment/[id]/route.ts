@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import React from "react"
 
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params
     const { id } = resolvedParams
 
