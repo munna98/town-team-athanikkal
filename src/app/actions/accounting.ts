@@ -91,7 +91,11 @@ export async function submitPayment(data: z.infer<typeof paymentSchema>) {
 
         revalidatePath("/admin/accounting/payments")
         revalidatePath("/admin/accounting/reports")
-        return { success: true, transactionId: transaction.id }
+        return { 
+            success: true, 
+            transactionId: transaction.id, 
+            referenceNo: transaction.referenceNo 
+        }
     } catch (error: any) {
         return { error: error.message || "Failed to submit payment" }
     }

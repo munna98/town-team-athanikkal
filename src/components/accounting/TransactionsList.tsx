@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX } from "lucide-react"
-import { DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
+import { DownloadReceiptButton, ShareReceiptButton, DownloadPaymentButton, SharePaymentButton } from "@/components/pdf/DownloadButtons"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select"
@@ -263,8 +263,17 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                                             <div className="flex items-center justify-center gap-1">
                                                                 {showPdf && (
                                                                     <>
-                                                                        <DownloadReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} />
-                                                                        <ShareReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={txn.collectedBy?.mobile} />
+                                                                        {type === "RECEIPT" ? (
+                                                                            <>
+                                                                                <DownloadReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} />
+                                                                                <ShareReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={txn.collectedBy?.mobile} />
+                                                                            </>
+                                                                        ) : type === "PAYMENT" ? (
+                                                                            <>
+                                                                                <DownloadPaymentButton transactionId={txn.id} referenceNo={txn.referenceNo} />
+                                                                                <SharePaymentButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={txn.collectedBy?.mobile} />
+                                                                            </>
+                                                                        ) : null}
                                                                     </>
                                                                 )}
                                                                 <Link href={`${editBasePath}/${txn.id}/edit`}>
@@ -319,7 +328,7 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                                                     <div className="space-y-2">
                                                                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                                             <User className="h-3 w-3" />
-                                                                            Collected By
+                                                                            {type === "RECEIPT" ? "Collected By" : null}
                                                                         </div>
                                                                         <div className="text-xs text-slate-700 font-semibold pl-3 border-l-2 border-slate-200">
                                                                             {txn.collectedBy?.name || <span className="text-slate-400">Generic</span>}

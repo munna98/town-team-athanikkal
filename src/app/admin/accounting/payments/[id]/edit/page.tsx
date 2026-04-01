@@ -39,8 +39,10 @@ export default async function EditPaymentPage({
 
     return (
         <div className="space-y-4 max-w-4xl mx-auto">
-            <div>
-                <p className="text-xs text-slate-400 font-mono">{txnRaw.referenceNo}</p>
+            <div className="flex flex-col">
+                <span className="text-[10px] font-mono font-bold text-rose-500 uppercase tracking-widest bg-rose-50 w-fit px-1.5 py-0.5 rounded border border-rose-100 mb-1">
+                    {txnRaw.referenceNo}
+                </span>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900">Edit Payment</h1>
             </div>
             <EditPaymentForm

@@ -42,8 +42,6 @@ export function EditPaymentForm({
     // Expense and Liability ledgers
     const pureExpense = ledgers.filter(l => l.group.nature === "EXPENSE")
     const liabilities = ledgers.filter(l => l.group.nature === "LIABILITY" && !l.isSystem)
-    const cashAndBank = ledgers.filter(l => l.group.nature === "ASSET" && (l.group.name === "Cash" || l.group.name === "Bank Accounts"))
-
 
     async function onSubmit(data: PaymentInput) {
         setIsLoading(true)
@@ -53,7 +51,7 @@ export function EditPaymentForm({
                 toast.error(result.error)
             } else {
                 toast.success("Payment updated successfully")
-                router.push("/admin/accounting/payments?tab=all")
+                router.push("/admin/accounting/payments")
                 router.refresh()
             }
         } catch {
@@ -122,17 +120,15 @@ export function EditPaymentForm({
                                 control={form.control}
                                 name="expenseLedgerId"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="min-w-0">
                                         <FormLabel>Debit Account (Expense/Liability) *</FormLabel>
-                                        <FormControl>
-                                            <LedgerCombobox
-                                                ledgers={[...pureExpense, ...liabilities]}
-                                                value={field.value}
-                                                onValueChange={field.onChange}
-                                                placeholder="Choose account..."
-                                                showMemberCodesOnly={true}
-                                            />
-                                        </FormControl>
+                                        <LedgerCombobox
+                                            ledgers={[...pureExpense, ...liabilities]}
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                            placeholder="Choose account..."
+                                            showMemberCodesOnly={true}
+                                        />
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -142,7 +138,7 @@ export function EditPaymentForm({
                                 control={form.control}
                                 name="amount"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="min-w-0">
                                         <FormLabel>Amount (₹) *</FormLabel>
                                         <FormControl>
                                             <Input type="number" step="0.01" min="1" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />

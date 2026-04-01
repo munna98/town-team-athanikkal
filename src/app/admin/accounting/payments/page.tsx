@@ -34,6 +34,7 @@ export default async function PaymentsPage() {
                     <TransactionsList
                         type="PAYMENT"
                         editBasePath="/admin/accounting/payments"
+                        showPdf={true}
                     />
                 </TabsContent>
             </Tabs>
