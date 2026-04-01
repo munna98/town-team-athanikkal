@@ -28,22 +28,29 @@ import {
     SelectValue
 } from "@/components/ui/select"
 import { formatCurrency, bloodGroupLabels } from "@/lib/utils"
+import { useSearchParams } from "next/navigation"
 import { Search, Plus, Loader2, Eye, FileEdit, MoreVertical } from "lucide-react"
 import { BulkImportDialog } from "./BulkImportDialog"
 import { MemberReceiptDialog } from "./MemberReceiptDialog"
 
 export function MemberTable() {
+    const searchParams = useSearchParams()
     const [members, setMembers] = useState<any[]>([])
     const [tiers, setTiers] = useState<any[]>([])
     const [ledgers, setLedgers] = useState<any[]>([])
     const [executives, setExecutives] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
-    const [status, setStatus] = useState("ALL")
+    const [status, setStatus] = useState(searchParams.get("status") || "ALL")
     const [isExec, setIsExec] = useState("ALL")
     const [bloodGroup, setBloodGroup] = useState("ALL")
     const [isActive, setIsActive] = useState("ALL")
     const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        const s = searchParams.get("status")
+        if (s) setStatus(s)
+    }, [searchParams])
 
     const fetchMembers = async () => {
         setLoading(true)

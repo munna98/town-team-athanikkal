@@ -90,12 +90,12 @@ export default async function AdminDashboard() {
     const stats = await getDashboardStats()
 
     const cards = [
-        { title: "Total Members", value: stats.totalMembers.toString(), icon: Users, color: "text-slate-600", bg: "bg-slate-50" },
-        { title: "Pending", value: stats.pendingMembers.toString(), icon: UserCheck, color: "text-amber-600", bg: "bg-amber-50" },
-        { title: "Basic", value: stats.basicMembers.toString(), icon: UserCheck, color: "text-blue-600", bg: "bg-blue-50" },
-        { title: "Silver", value: stats.silverMembers.toString(), icon: Award, color: "text-slate-400", bg: "bg-slate-50" },
-        { title: "Gold", value: stats.goldMembers.toString(), icon: Award, color: "text-amber-500", bg: "bg-amber-50" },
-        { title: "Platinum", value: stats.platinumMembers.toString(), icon: Award, color: "text-indigo-600", bg: "bg-indigo-50" },
+        { title: "Total Members", value: stats.totalMembers.toString(), icon: Users, color: "text-slate-600", bg: "bg-slate-50", href: "/admin/members" },
+        { title: "Pending", value: stats.pendingMembers.toString(), icon: UserCheck, color: "text-amber-600", bg: "bg-amber-50", href: "/admin/members?status=PENDING" },
+        { title: "Basic", value: stats.basicMembers.toString(), icon: UserCheck, color: "text-blue-600", bg: "bg-blue-50", href: "/admin/members?status=BASIC" },
+        { title: "Silver", value: stats.silverMembers.toString(), icon: Award, color: "text-slate-400", bg: "bg-slate-50", href: "/admin/members?status=SILVER" },
+        { title: "Gold", value: stats.goldMembers.toString(), icon: Award, color: "text-amber-500", bg: "bg-amber-50", href: "/admin/members?status=GOLD" },
+        { title: "Platinum", value: stats.platinumMembers.toString(), icon: Award, color: "text-indigo-600", bg: "bg-indigo-50", href: "/admin/members?status=PLATINUM" },
         { title: "Cash Balance", value: formatCurrency(stats.cashBalance), icon: CreditCard, color: "text-emerald-600", bg: "bg-emerald-50" },
         { title: "Bank Balance", value: formatCurrency(stats.bankBalance), icon: Landmark, color: "text-violet-600", bg: "bg-violet-50" },
         { title: "Month Income", value: formatCurrency(stats.monthIncome), icon: TrendingUp, color: "text-green-600", bg: "bg-green-50" },
@@ -111,19 +111,31 @@ export default async function AdminDashboard() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-4">
-                {cards.map((card) => (
-                    <Card key={card.title} className="shadow-sm hover:shadow-md transition-shadow">
-                        <CardContent className="p-2 flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg ${card.bg} flex items-center justify-center shrink-0`}>
-                                <card.icon className={`h-4 w-4 ${card.color}`} />
-                            </div>
-                            <div className="min-w-0">
-                                <div className="text-lg font-bold text-slate-800 leading-tight truncate">{card.value}</div>
-                                <div className="text-[9px] font-medium text-slate-500 uppercase tracking-tighter truncate">{card.title}</div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                {cards.map((card) => {
+                    const Content = (
+                        <Card key={card.title} className={`shadow-sm hover:shadow-md transition-shadow ${card.href ? 'cursor-pointer hover:border-sky-500/50 hover:bg-slate-50/50' : ''}`}>
+                            <CardContent className="p-2 flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-lg ${card.bg} flex items-center justify-center shrink-0`}>
+                                    <card.icon className={`h-4 w-4 ${card.color}`} />
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="text-lg font-bold text-slate-800 leading-tight truncate">{card.value}</div>
+                                    <div className="text-[9px] font-medium text-slate-500 uppercase tracking-tighter truncate">{card.title}</div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )
+
+                    if (card.href) {
+                        return (
+                            <Link key={card.title} href={card.href}>
+                                {Content}
+                            </Link>
+                        )
+                    }
+
+                    return Content
+                })}
             </div>
 
             {/* Quick Actions + Recent Transactions */}
