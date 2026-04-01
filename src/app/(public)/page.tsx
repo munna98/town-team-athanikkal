@@ -47,6 +47,9 @@ export default async function LandingPage() {
                         <Link href="/membership" className="text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors">
                             Membership
                         </Link>
+                        <Link href="/members" className="text-sm font-medium text-slate-400 hover:text-amber-400 transition-colors">
+                            Members
+                        </Link>
                         <Link href="/login">
                             <Button size="sm" className="bg-cyan-500 hover:bg-cyan-400 text-[#0a0f1a] font-bold rounded-full px-5 transition-all hover:shadow-[0_0_20px_rgba(0,188,212,0.3)]">
                                 Portal Login
@@ -97,15 +100,21 @@ export default async function LandingPage() {
                             with excellence in community since day one.
                         </p>
 
-                        <div className="landing-fade-in landing-fade-in-delay-3 flex flex-col sm:flex-row gap-4 justify-center">
+                        <div className="landing-fade-in landing-fade-in-delay-3 flex flex-col sm:flex-row flex-wrap gap-4 justify-center mt-8">
                             <Link href="/membership">
-                                <Button size="lg" className="bg-cyan-500 hover:bg-cyan-400 text-[#0a0f1a] font-bold text-base rounded-full px-8 h-12 transition-all hover:shadow-[0_0_30px_rgba(0,188,212,0.4)] group">
+                                <Button size="lg" className="bg-cyan-500 hover:bg-cyan-400 text-[#0a0f1a] font-bold text-base rounded-full px-8 h-12 transition-all hover:shadow-[0_0_30px_rgba(0,188,212,0.4)] group w-full sm:w-auto">
                                     Become a Member
                                     <ChevronRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
                                 </Button>
                             </Link>
+                            <Link href="/members">
+                                <Button size="lg" className="bg-transparent border border-amber-400/40 text-amber-400 hover:bg-amber-500/10 hover:border-amber-400/60 rounded-full px-8 h-12 font-semibold backdrop-blur-sm w-full sm:w-auto transition-all">
+                                    <Users className="mr-2 w-4 h-4" />
+                                    See our Members
+                                </Button>
+                            </Link>
                             <Link href="#about">
-                                <Button size="lg" className="bg-transparent border border-cyan-400/40 text-white hover:bg-cyan-500/10 hover:border-cyan-400/60 rounded-full px-8 h-12 font-semibold backdrop-blur-sm">
+                                <Button size="lg" className="bg-transparent border border-cyan-400/40 text-white hover:bg-cyan-500/10 hover:border-cyan-400/60 rounded-full px-8 h-12 font-semibold backdrop-blur-sm w-full sm:w-auto">
                                     Learn More
                                 </Button>
                             </Link>
