@@ -6,9 +6,6 @@ import { auth } from "@/lib/auth"
 import React from "react"
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-    const session = await auth()
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
     const resolvedParams = await params
     const { id } = resolvedParams
 

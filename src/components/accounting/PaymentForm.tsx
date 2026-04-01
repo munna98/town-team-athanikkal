@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select"
 import { LedgerCombobox } from "./LedgerCombobox"
 import { Loader2, CheckCircle2 } from "lucide-react"
-import { DownloadPaymentButton, SharePaymentButton } from "@/components/pdf/DownloadButtons"
+import { DownloadPaymentButton, SharePaymentButton, DirectDownloadPaymentLink } from "@/components/pdf/DownloadButtons"
 
 export function PaymentForm({ 
     ledgers,
@@ -96,9 +96,12 @@ export function PaymentForm({
                     <p className="text-slate-500 mt-1">Reference No: <span className="font-semibold text-slate-700">{successData.referenceNo}</span></p>
                 </div>
 
-                <div className="flex gap-4 mt-6">
-                    <DownloadPaymentButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} size="default" className="border-rose-200 text-rose-700 hover:bg-rose-50" />
-                    <SharePaymentButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} size="default" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" mobile={successData.mobile} />
+                <div className="flex flex-col items-center gap-3">
+                    <div className="flex gap-4 mt-6">
+                        <DownloadPaymentButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} size="default" className="border-rose-200 text-rose-700 hover:bg-rose-50" />
+                        <SharePaymentButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} size="default" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" mobile={successData.mobile} />
+                    </div>
+                    <DirectDownloadPaymentLink transactionId={successData.transactionId} referenceNo={successData.referenceNo} />
                 </div>
 
                 <div className="pt-4 w-full max-w-xs mx-auto border-t mt-4">

@@ -20,7 +20,7 @@ import {
 import { LedgerCombobox } from "./LedgerCombobox"
 import { Label } from "@/components/ui/label"
 import { Loader2, CheckCircle2, Info } from "lucide-react"
-import { DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
+import { DownloadReceiptButton, ShareReceiptButton, DirectDownloadReceiptLink } from "@/components/pdf/DownloadButtons"
 
 import { useSearchParams } from "next/navigation"
 
@@ -106,17 +106,20 @@ export function ReceiptForm({
                     <p className="text-slate-500 mt-1">Reference No: <span className="font-semibold text-slate-700">{successData.referenceNo}</span></p>
                 </div>
 
-                <div className="flex gap-4 mt-6">
-                    <Button variant="outline" className="border-sky-200 text-sky-700 hover:bg-sky-50" asChild>
-                        <div>
-                            <DownloadReceiptButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} />
-                        </div>
-                    </Button>
-                    <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" asChild>
-                        <div>
-                            <ShareReceiptButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} mobile={successData.mobile} />
-                        </div>
-                    </Button>
+                <div className="flex flex-col items-center gap-3">
+                    <div className="flex gap-4 mt-6">
+                        <Button variant="outline" className="border-sky-200 text-sky-700 hover:bg-sky-50" asChild>
+                            <div>
+                                <DownloadReceiptButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} />
+                            </div>
+                        </Button>
+                        <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" asChild>
+                            <div>
+                                <ShareReceiptButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} mobile={successData.mobile} />
+                            </div>
+                        </Button>
+                    </div>
+                    <DirectDownloadReceiptLink transactionId={successData.transactionId} referenceNo={successData.referenceNo} />
                 </div>
 
                 <div className="pt-4 w-full max-w-xs mx-auto border-t mt-4">

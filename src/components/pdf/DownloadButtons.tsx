@@ -99,6 +99,19 @@ export function DownloadReceiptButton({ transactionId, referenceNo }: { transact
     )
 }
 
+export function DirectDownloadReceiptLink({ transactionId, referenceNo, className = "" }: { transactionId: string; referenceNo: string; className?: string }) {
+    return (
+        <a 
+            href={`/api/pdf/receipt/${transactionId}`}
+            download={`receipt-${referenceNo}.pdf`}
+            className={`text-slate-500 hover:text-sky-600 text-[11px] underline underline-offset-4 flex items-center gap-1 transition-colors ${className}`}
+            title="Direct link to PDF"
+        >
+            Direct Download Link
+        </a>
+    )
+}
+
 export function ShareReceiptButton({ transactionId, referenceNo, mobile }: { transactionId: string; referenceNo: string; mobile?: string | null }) {
     const [loading, setLoading] = useState(false)
 
@@ -109,7 +122,8 @@ export function ShareReceiptButton({ transactionId, referenceNo, mobile }: { tra
             if (mobile) {
                 const cleanMobile = mobile.replace(/\D/g, '')
                 const finalMobile = cleanMobile.length === 10 ? `91${cleanMobile}` : cleanMobile
-                const text = encodeURIComponent(`Hello, here is your receipt ${referenceNo} from Town Team Sports Club.`)
+                const downloadUrl = `${window.location.origin}/api/pdf/receipt/${transactionId}`
+                const text = encodeURIComponent(`Hello, here is your receipt ${referenceNo} from Town Team Sports Club.\n\nDownload here: ${downloadUrl}`)
                 const waUrl = `https://wa.me/${finalMobile}?text=${text}`
                 window.open(waUrl, '_blank')
                 toast.success("Opening WhatsApp chat...")
@@ -135,7 +149,8 @@ export function ShareReceiptButton({ transactionId, referenceNo, mobile }: { tra
                 toast.success("Receipt shared!")
             } else {
                 // Fallback to WhatsApp text link without file if navigator.share not supported
-                const text = encodeURIComponent(`Here is your receipt reference number: ${referenceNo}. Please contact us if you need the PDF copy.`)
+                const downloadUrl = `${window.location.origin}/api/pdf/receipt/${transactionId}`
+                const text = encodeURIComponent(`Here is your receipt reference number: ${referenceNo}.\n\nDownload PDF: ${downloadUrl}`)
                 const waUrl = `https://wa.me/?text=${text}`
                 window.open(waUrl, '_blank')
                 toast.success("Opened WhatsApp (file sharing not supported)")
@@ -210,6 +225,19 @@ export function DownloadPaymentButton({ transactionId, referenceNo, variant = "g
     )
 }
 
+export function DirectDownloadPaymentLink({ transactionId, referenceNo, className = "" }: { transactionId: string; referenceNo: string; className?: string }) {
+    return (
+        <a 
+            href={`/api/pdf/payment/${transactionId}`}
+            download={`payment-${referenceNo}.pdf`}
+            className={`text-slate-500 hover:text-rose-600 text-[11px] underline underline-offset-4 flex items-center gap-1 transition-colors ${className}`}
+            title="Direct link to PDF"
+        >
+            Direct Download Link
+        </a>
+    )
+}
+
 export function SharePaymentButton({ transactionId, referenceNo, mobile, variant = "ghost", size = "sm", className }: ReceiptButtonProps) {
     const [isSharing, setIsSharing] = useState(false)
 
@@ -220,7 +248,8 @@ export function SharePaymentButton({ transactionId, referenceNo, mobile, variant
             if (mobile) {
                 const cleanMobile = mobile.replace(/\D/g, '')
                 const finalMobile = cleanMobile.length === 10 ? `91${cleanMobile}` : cleanMobile
-                const text = encodeURIComponent(`Hello, here is your payment voucher ${referenceNo} from Town Team Sports Club.`)
+                const downloadUrl = `${window.location.origin}/api/pdf/payment/${transactionId}`
+                const text = encodeURIComponent(`Hello, here is your payment voucher ${referenceNo} from Town Team Sports Club.\n\nDownload here: ${downloadUrl}`)
                 const waUrl = `https://wa.me/${finalMobile}?text=${text}`
                 window.open(waUrl, '_blank')
                 toast.success("Opening WhatsApp chat...")
@@ -242,7 +271,8 @@ export function SharePaymentButton({ transactionId, referenceNo, mobile, variant
                 })
             } else {
                 // Fallback if navigator.share not supported
-                const text = encodeURIComponent(`Here is your payment voucher reference number: ${referenceNo}.`)
+                const downloadUrl = `${window.location.origin}/api/pdf/payment/${transactionId}`
+                const text = encodeURIComponent(`Here is your payment voucher reference number: ${referenceNo}.\n\nDownload PDF: ${downloadUrl}`)
                 const waUrl = `https://wa.me/?text=${text}`
                 window.open(waUrl, '_blank')
                 toast.success("Opened WhatsApp (file sharing not supported)")
