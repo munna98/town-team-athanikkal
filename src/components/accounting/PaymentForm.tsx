@@ -70,6 +70,7 @@ export function PaymentForm({
                 setSuccessData({
                     transactionId: result.transactionId,
                     referenceNo: result.referenceNo,
+                    mobile: result.mobile,
                 })
                 form.reset({
                     ...form.getValues(),
@@ -97,7 +98,7 @@ export function PaymentForm({
 
                 <div className="flex gap-4 mt-6">
                     <DownloadPaymentButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} size="default" className="border-rose-200 text-rose-700 hover:bg-rose-50" />
-                    <SharePaymentButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} size="default" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" mobile="9999999999" />
+                    <SharePaymentButton transactionId={successData.transactionId} referenceNo={successData.referenceNo} size="default" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50" mobile={successData.mobile} />
                 </div>
 
                 <div className="pt-4 w-full max-w-xs mx-auto border-t mt-4">

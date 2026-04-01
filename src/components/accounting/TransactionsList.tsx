@@ -120,6 +120,19 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
         return `${names[0]} + ${names.length - 1} more`
     }
 
+    function getMemberMobile(txn: any) {
+        if (!txn.lines) return null
+        if (txn.type === "RECEIPT") {
+            const line = txn.lines.find((l: any) => Number(l.credit) > 0 && l.ledger?.member?.mobile)
+            return line?.ledger?.member?.mobile || null
+        }
+        if (txn.type === "PAYMENT") {
+            const line = txn.lines.find((l: any) => Number(l.debit) > 0 && l.ledger?.member?.mobile)
+            return line?.ledger?.member?.mobile || null
+        }
+        return null
+    }
+
     function toggleRow(id: string) {
         setExpandedRows(prev => 
             prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
@@ -266,12 +279,12 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                                                         {type === "RECEIPT" ? (
                                                                             <>
                                                                                 <DownloadReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} />
-                                                                                <ShareReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={txn.collectedBy?.mobile} />
+                                                                                <ShareReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={getMemberMobile(txn)} />
                                                                             </>
                                                                         ) : type === "PAYMENT" ? (
                                                                             <>
                                                                                 <DownloadPaymentButton transactionId={txn.id} referenceNo={txn.referenceNo} />
-                                                                                <SharePaymentButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={txn.collectedBy?.mobile} />
+                                                                                <SharePaymentButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={getMemberMobile(txn)} />
                                                                             </>
                                                                         ) : null}
                                                                     </>

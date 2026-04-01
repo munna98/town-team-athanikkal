@@ -105,6 +105,18 @@ export function ShareReceiptButton({ transactionId, referenceNo, mobile }: { tra
     async function handleShare() {
         setLoading(true)
         try {
+            // If mobile is provided, use direct WhatsApp link to avoid contact selection
+            if (mobile) {
+                const cleanMobile = mobile.replace(/\D/g, '')
+                const finalMobile = cleanMobile.length === 10 ? `91${cleanMobile}` : cleanMobile
+                const text = encodeURIComponent(`Hello, here is your receipt ${referenceNo} from Town Team Sports Club.`)
+                const waUrl = `https://wa.me/${finalMobile}?text=${text}`
+                window.open(waUrl, '_blank')
+                toast.success("Opening WhatsApp chat...")
+                setLoading(false)
+                return
+            }
+
             const res = await fetch(`/api/pdf/receipt/${transactionId}`)
             if (!res.ok) {
                 const data = await res.json()
@@ -122,17 +134,9 @@ export function ShareReceiptButton({ transactionId, referenceNo, mobile }: { tra
                 })
                 toast.success("Receipt shared!")
             } else {
-                // Fallback to WhatsApp text link without file
+                // Fallback to WhatsApp text link without file if navigator.share not supported
                 const text = encodeURIComponent(`Here is your receipt reference number: ${referenceNo}. Please contact us if you need the PDF copy.`)
-                let waUrl = `https://wa.me/?text=${text}`
-                
-                if (mobile) {
-                    const cleanMobile = mobile.replace(/\D/g, '')
-                    // Assuming India by default if 10 digits
-                    const finalMobile = cleanMobile.length === 10 ? `91${cleanMobile}` : cleanMobile
-                    waUrl = `https://wa.me/${finalMobile}?text=${text}`
-                }
-                
+                const waUrl = `https://wa.me/?text=${text}`
                 window.open(waUrl, '_blank')
                 toast.success("Opened WhatsApp (file sharing not supported)")
             }
@@ -212,6 +216,18 @@ export function SharePaymentButton({ transactionId, referenceNo, mobile, variant
     const handleShare = async () => {
         setIsSharing(true)
         try {
+            // If mobile is provided, use direct WhatsApp link to avoid contact selection
+            if (mobile) {
+                const cleanMobile = mobile.replace(/\D/g, '')
+                const finalMobile = cleanMobile.length === 10 ? `91${cleanMobile}` : cleanMobile
+                const text = encodeURIComponent(`Hello, here is your payment voucher ${referenceNo} from Town Team Sports Club.`)
+                const waUrl = `https://wa.me/${finalMobile}?text=${text}`
+                window.open(waUrl, '_blank')
+                toast.success("Opening WhatsApp chat...")
+                setIsSharing(false)
+                return
+            }
+
             const response = await fetch(`/api/pdf/payment/${transactionId}`)
             if (!response.ok) throw new Error("Failed to generate PDF")
             
@@ -225,7 +241,11 @@ export function SharePaymentButton({ transactionId, referenceNo, mobile, variant
                     text: `Payment Voucher for ${referenceNo} from Town Team Sports Club`,
                 })
             } else {
-                toast.error("Web Share API not supported on this browser")
+                // Fallback if navigator.share not supported
+                const text = encodeURIComponent(`Here is your payment voucher reference number: ${referenceNo}.`)
+                const waUrl = `https://wa.me/?text=${text}`
+                window.open(waUrl, '_blank')
+                toast.success("Opened WhatsApp (file sharing not supported)")
             }
         } catch (error) {
             console.error("Share error:", error)

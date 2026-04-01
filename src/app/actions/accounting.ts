@@ -89,12 +89,19 @@ export async function submitPayment(data: z.infer<typeof paymentSchema>) {
             ]
         })
 
+        // Fetch member mobile for the response if possible
+        const debitLedger = await prisma.ledger.findUnique({
+            where: { id: parsed.expenseLedgerId },
+            include: { member: { select: { mobile: true } } }
+        })
+
         revalidatePath("/admin/accounting/payments")
         revalidatePath("/admin/accounting/reports")
         return { 
             success: true, 
             transactionId: transaction.id, 
-            referenceNo: transaction.referenceNo 
+            referenceNo: transaction.referenceNo,
+            mobile: debitLedger?.member?.mobile || undefined
         }
     } catch (error: any) {
         return { error: error.message || "Failed to submit payment" }
@@ -218,7 +225,7 @@ export async function getTransactions({
             where,
             include: {
                 lines: {
-                    include: { ledger: { select: { id: true, name: true, code: true } } }
+                    include: { ledger: { select: { id: true, name: true, code: true, memberId: true, member: { select: { mobile: true } } } } }
                 },
                 collectedBy: { select: { id: true, name: true } },
                 createdBy: { select: { id: true, email: true } },
@@ -250,7 +257,7 @@ export async function getTransactionById(id: string) {
         where: { id },
         include: {
             lines: {
-                include: { ledger: { select: { id: true, name: true, code: true } } }
+                include: { ledger: { select: { id: true, name: true, code: true, memberId: true, member: { select: { mobile: true } } } } }
             },
             collectedBy: { select: { id: true, name: true } },
             createdBy: { select: { id: true, email: true } },
