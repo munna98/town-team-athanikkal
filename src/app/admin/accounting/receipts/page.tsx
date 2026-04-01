@@ -50,6 +50,7 @@ export default async function ReceiptsPage() {
                         type="RECEIPT"
                         editBasePath="/admin/accounting/receipts"
                         showPdf={true}
+                        executives={executives}
                     />
                 </TabsContent>
             </Tabs>

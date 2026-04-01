@@ -10,8 +10,11 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft } from "lucide-react"
+import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX } from "lucide-react"
 import { DownloadReceiptButton, ShareReceiptButton } from "@/components/pdf/DownloadButtons"
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select"
 import Link from "next/link"
 import { toast } from "sonner"
 import {
@@ -32,6 +35,7 @@ interface Props {
     type: TxType
     editBasePath: string  // e.g. "/admin/accounting/receipts"
     showPdf?: boolean     // only receipts have PDF
+    executives?: any[]    // for filtering receipts
 }
 
 const typeBadge: Record<TxType, { label: string; className: string }> = {
@@ -41,7 +45,7 @@ const typeBadge: Record<TxType, { label: string; className: string }> = {
     JOURNAL: { label: "Journal", className: "bg-amber-100 text-amber-700 border-amber-200" },
 }
 
-export function TransactionsList({ type, editBasePath, showPdf = false }: Props) {
+export function TransactionsList({ type, editBasePath, showPdf = false, executives }: Props) {
     const [data, setData] = useState<{
         transactions: any[]
         total: number
@@ -53,6 +57,11 @@ export function TransactionsList({ type, editBasePath, showPdf = false }: Props)
     const [loading, setLoading] = useState(false)
     const [debouncedSearch, setDebouncedSearch] = useState("")
     const [expandedRows, setExpandedRows] = useState<string[]>([])
+    
+    // Filters
+    const [fromDate, setFromDate] = useState<string>("")
+    const [toDate, setToDate] = useState<string>("")
+    const [collectedBy, setCollectedBy] = useState<string>("all")
 
     // Debounce search
     useEffect(() => {
@@ -60,20 +69,27 @@ export function TransactionsList({ type, editBasePath, showPdf = false }: Props)
         return () => clearTimeout(t)
     }, [search])
 
-    // Reset page on new search
-    useEffect(() => { setPage(1) }, [debouncedSearch])
+    // Reset page on new search or filter
+    useEffect(() => { setPage(1) }, [debouncedSearch, fromDate, toDate, collectedBy])
 
     const load = useCallback(async () => {
         setLoading(true)
         try {
-            const result = await getTransactions({ type, page, search: debouncedSearch })
+            const result = await getTransactions({ 
+                type, 
+                page, 
+                search: debouncedSearch,
+                fromDate: fromDate || undefined,
+                toDate: toDate || undefined,
+                collectedBy: collectedBy === "all" ? undefined : collectedBy
+            })
             setData(result)
         } catch (e) {
             console.error(e)
         } finally {
             setLoading(false)
         }
-    }, [type, page, debouncedSearch])
+    }, [type, page, debouncedSearch, fromDate, toDate, collectedBy])
 
     useEffect(() => { load() }, [load])
 
@@ -112,15 +128,72 @@ export function TransactionsList({ type, editBasePath, showPdf = false }: Props)
 
     return (
         <div className="space-y-4">
-            {/* Search bar */}
-            <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                    className="pl-9"
-                    placeholder="Search by ref no or narration..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
+            {/* Action Bar & Filters */}
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-slate-50/50 p-3 rounded-lg border border-slate-100">
+                <div className="relative w-full sm:max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                        className="pl-9 bg-white"
+                        placeholder="Search by ref no or narration..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <div className="flex items-center gap-2">
+                        <Input
+                            type="date"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                            className="w-[140px] text-xs h-9 bg-white"
+                            title="From Date"
+                        />
+                        <span className="text-slate-400 text-xs">-</span>
+                        <Input
+                            type="date"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                            className="w-[140px] text-xs h-9 bg-white"
+                            title="To Date"
+                        />
+                    </div>
+
+                    {type === "RECEIPT" && executives && (
+                        <div className="w-[160px]">
+                            <Select value={collectedBy} onValueChange={setCollectedBy}>
+                                <SelectTrigger className="h-9 text-xs bg-white">
+                                    <SelectValue placeholder="Collected By" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Executives</SelectItem>
+                                    {executives.map((e: any) => (
+                                        <SelectItem key={e.id} value={e.id}>
+                                            {e.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+
+                    {(fromDate || toDate || collectedBy !== "all" || search) && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 text-slate-500 hover:text-slate-900"
+                            onClick={() => {
+                                setFromDate("")
+                                setToDate("")
+                                setCollectedBy("all")
+                                setSearch("")
+                            }}
+                            title="Clear all filters"
+                        >
+                            <FilterX className="h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
             </div>
 
             <Card>

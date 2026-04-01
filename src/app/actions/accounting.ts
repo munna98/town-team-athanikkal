@@ -172,11 +172,17 @@ export async function getTransactions({
     page = 1,
     search = "",
     pageSize = 15,
+    fromDate,
+    toDate,
+    collectedBy,
 }: {
     type: "RECEIPT" | "PAYMENT" | "CONTRA" | "JOURNAL"
     page?: number
     search?: string
     pageSize?: number
+    fromDate?: string
+    toDate?: string
+    collectedBy?: string
 }) {
     const session = await auth()
     if (!session?.user?.id) throw new Error("Unauthorized")
@@ -189,7 +195,18 @@ export async function getTransactions({
                 { referenceNo: { contains: search, mode: "insensitive" } },
                 { narration: { contains: search, mode: "insensitive" } },
             ]
-        } : {})
+        } : {}),
+        ...(fromDate && toDate ? {
+            date: {
+                gte: new Date(fromDate),
+                lte: new Date(toDate),
+            }
+        } : fromDate ? {
+            date: { gte: new Date(fromDate) }
+        } : toDate ? {
+            date: { lte: new Date(toDate) }
+        } : {}),
+        ...(collectedBy ? { collectedById: collectedBy } : {})
     }
 
     const [transactions, total] = await Promise.all([
