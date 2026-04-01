@@ -3,7 +3,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import prisma from "@/lib/prisma"
 import { HeroBackground } from "@/components/landing/HeroBackground"
-import { Trophy, Users, Calendar, ChevronRight, Shield, Droplet, Instagram, MessageCircle } from "lucide-react"
+import { Trophy, Users, Calendar, ChevronRight, Shield, Instagram, MessageCircle } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +14,6 @@ export default async function LandingPage() {
             id: true,
             name: true,
             photoUrl: true,
-            bloodGroup: true,
             position: true
         }
     })
@@ -189,10 +188,7 @@ export default async function LandingPage() {
                                         )}
                                         <h3 className="font-bold text-lg text-white">{exec.name}</h3>
                                         <p className="text-sm font-medium text-cyan-400 mt-1">{exec.position || "Executive Member"}</p>
-                                        <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] text-xs text-slate-500">
-                                            <Droplet className="w-3.5 h-3.5 text-red-400/60 fill-red-400/60" />
-                                            {exec.bloodGroup.replace("_POS", "+ve").replace("_NEG", "-ve")}
-                                        </div>
+
                                     </div>
                                 ))}
                             </div>
