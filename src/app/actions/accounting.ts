@@ -247,6 +247,59 @@ export async function getTransactions({
     }
 }
 
+// ─── Get All Transactions for Export (no pagination) ──────────────────────────
+
+export async function getAllTransactionsForExport({
+    type,
+    search = "",
+    fromDate,
+    toDate,
+    collectedBy,
+}: {
+    type: "RECEIPT" | "PAYMENT" | "CONTRA" | "JOURNAL"
+    search?: string
+    fromDate?: string
+    toDate?: string
+    collectedBy?: string
+}) {
+    const session = await auth()
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const where: any = {
+        type,
+        ...(search ? {
+            OR: [
+                { referenceNo: { contains: search, mode: "insensitive" } },
+                { narration: { contains: search, mode: "insensitive" } },
+            ]
+        } : {}),
+        ...(fromDate && toDate ? {
+            date: {
+                gte: new Date(fromDate),
+                lte: new Date(toDate),
+            }
+        } : fromDate ? {
+            date: { gte: new Date(fromDate) }
+        } : toDate ? {
+            date: { lte: new Date(toDate) }
+        } : {}),
+        ...(collectedBy ? { collectedById: collectedBy } : {})
+    }
+
+    const transactions = await prisma.transaction.findMany({
+        where,
+        include: {
+            lines: {
+                include: { ledger: { select: { id: true, name: true, code: true } } }
+            },
+            collectedBy: { select: { id: true, name: true } },
+        },
+        orderBy: { date: "desc" },
+    })
+
+    return JSON.parse(JSON.stringify(transactions))
+}
+
 // ─── Get Single Transaction ───────────────────────────────────────────────────
 
 export async function getTransactionById(id: string) {

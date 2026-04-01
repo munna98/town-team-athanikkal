@@ -28,8 +28,9 @@ import {
     SelectValue
 } from "@/components/ui/select"
 import { formatCurrency, bloodGroupLabels } from "@/lib/utils"
+import { exportToExcel } from "@/lib/excel-export"
 import { useSearchParams } from "next/navigation"
-import { Search, Plus, Loader2, Eye, FileEdit, MoreVertical } from "lucide-react"
+import { Search, Plus, Loader2, Eye, FileEdit, MoreVertical, Download } from "lucide-react"
 import { BulkImportDialog } from "./BulkImportDialog"
 import { MemberReceiptDialog } from "./MemberReceiptDialog"
 
@@ -162,6 +163,44 @@ export function MemberTable() {
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto shrink-0">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-9 gap-1.5"
+                        disabled={loading || members.length === 0}
+                        onClick={() => {
+                            const sortedTiersForExport = tiers
+                                .filter((t: any) => t.name !== "PENDING")
+                                .sort((a: any, b: any) => Number(a.threshold) - Number(b.threshold))
+
+                            const rows = members.map((m: any) => {
+                                const tierName = m.tier?.name || "Unknown"
+                                const curIdx = sortedTiersForExport.findIndex((t: any) => t.id === m.tierId)
+                                const nextT = curIdx >= 0 && curIdx < sortedTiersForExport.length - 1
+                                    ? sortedTiersForExport[curIdx + 1]
+                                    : sortedTiersForExport[0]
+                                const isMax = tierName === "PLATINUM"
+                                const bal = isMax ? 0 : nextT ? Math.max(0, Number(nextT.threshold) - Number(m.totalPaid)) : 0
+
+                                return {
+                                    "Code": m.membershipCode,
+                                    "Name": m.name,
+                                    "Mobile": m.mobile,
+                                    "Blood Group": bloodGroupLabels[m.bloodGroup] || m.bloodGroup,
+                                    "Status": tierName,
+                                    "Executive": m.isExecutive ? "Yes" : "No",
+                                    "Active": m.isActive ? "Yes" : "No",
+                                    "Total Paid": Number(m.totalPaid),
+                                    "Balance to Next": isMax ? "Nil" : bal,
+                                }
+                            })
+                            exportToExcel(rows, "Members_Report", "Members")
+                        }}
+                        title="Export to Excel"
+                    >
+                        <Download className="h-4 w-4" />
+                        Excel
+                    </Button>
                     <BulkImportDialog iconOnly />
                     <Link href="/admin/members/new" className="flex-1 md:flex-none">
                         <Button className="bg-sky-600 hover:bg-sky-700 w-full md:w-auto h-9">

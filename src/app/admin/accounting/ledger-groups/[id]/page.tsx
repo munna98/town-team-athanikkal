@@ -16,6 +16,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { ArrowLeft, FileText } from "lucide-react"
+import { ExportExcelButton } from "@/components/ui/ExportExcelButton"
 
 export const dynamic = "force-dynamic"
 
@@ -90,12 +91,27 @@ export default async function LedgerGroupReportPage({
                 </div>
             </div>
 
-            <LedgerGroupReportFilters
-                groups={groups}
-                currentGroupId={report.group.id}
-                currentFrom={resolvedSearchParams.from}
-                currentTo={resolvedSearchParams.to}
-            />
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <LedgerGroupReportFilters
+                    groups={groups}
+                    currentGroupId={report.group.id}
+                    currentFrom={resolvedSearchParams.from}
+                    currentTo={resolvedSearchParams.to}
+                />
+                <ExportExcelButton
+                    data={report.ledgers.map((ledger: any) => ({
+                        "Code": ledger.code,
+                        "Ledger": ledger.name,
+                        "Opening Balance": `${ledger.openingBalance} ${ledger.openingType}`,
+                        "Debit": ledger.totalDebit > 0 ? ledger.totalDebit : "",
+                        "Credit": ledger.totalCredit > 0 ? ledger.totalCredit : "",
+                        "Closing Balance": `${Math.abs(ledger.closingBalance)} ${ledger.closingBalance >= 0 ? "Dr" : "Cr"}`,
+                        "Transactions": ledger.transactionCount,
+                    }))}
+                    filename={`Ledger_Group_${report.group.name.replace(/\s+/g, "_")}`}
+                    sheetName={report.group.name}
+                />
+            </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <Card className="border-slate-200 shadow-sm">

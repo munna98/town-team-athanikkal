@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { ReportFilters } from "@/components/accounting/ReportFilters"
+import { ExportExcelButton } from "@/components/ui/ExportExcelButton"
 import prisma from "@/lib/prisma"
 import { Suspense } from "react"
 
@@ -28,6 +29,7 @@ export default async function ReportsPage({
 
     let reportTitle = "Report"
     let content = null
+    let exportButton = null
 
     if (type === "trial-balance") {
         reportTitle = "Trial Balance"
@@ -79,6 +81,16 @@ export default async function ReportsPage({
                 </CardContent>
             </Card>
         )
+
+        const exportData: Record<string, any>[] = tbRows.filter(r => r.debit !== 0 || r.credit !== 0).map(row => ({
+            "Code": row.ledgerCode,
+            "Ledger Name": row.ledgerName,
+            "Nature": row.nature,
+            "Debit": row.debit > 0 ? row.debit : "",
+            "Credit": row.credit > 0 ? row.credit : "",
+        }))
+        exportData.push({ "Code": "", "Ledger Name": "TOTALS", "Nature": "", "Debit": totalTbDebit, "Credit": totalTbCredit })
+        exportButton = <ExportExcelButton data={exportData} filename="Trial_Balance" sheetName="Trial Balance" />
     } else if (type === "ledger-statement") {
         reportTitle = "Ledger Statement"
         let stmtData = null
@@ -174,6 +186,18 @@ export default async function ReportsPage({
                 </CardContent>
             </Card>
         )
+
+        if (stmtData) {
+            const exportData = stmtData.statement.map((tx: any) => ({
+                "Date": formatDate(tx.date),
+                "Voucher": tx.referenceNo,
+                "Narration": tx.narration,
+                "Debit": tx.debit > 0 ? tx.debit : "",
+                "Credit": tx.credit > 0 ? tx.credit : "",
+                "Balance": `${Math.abs(tx.balance).toFixed(2)} ${tx.balance >= 0 ? "Dr" : "Cr"}`,
+            }))
+            exportButton = <ExportExcelButton data={exportData} filename={`Ledger_Statement_${stmtData.ledger.code}`} sheetName="Statement" />
+        }
     } else if (type === "income") {
         reportTitle = "Income & Expenditure"
         const { income, expense, totalIncome, totalExpense, surplus } = await getIncomeExpenditure(from, to)
@@ -244,6 +268,16 @@ export default async function ReportsPage({
                 </CardContent>
             </Card>
         )
+
+        const expenseData = expense.map(r => ({ "Ledger": r.ledgerName, "Amount": r.debit - r.credit }))
+        if (surplus > 0) expenseData.push({ "Ledger": "Surplus (Income over Expenditure)", "Amount": surplus })
+        expenseData.push({ "Ledger": "TOTAL", "Amount": totalExpense + (surplus > 0 ? surplus : 0) })
+
+        const incomeData = income.map(r => ({ "Ledger": r.ledgerName, "Amount": r.credit - r.debit }))
+        if (surplus < 0) incomeData.push({ "Ledger": "Deficit (Expenditure over Income)", "Amount": Math.abs(surplus) })
+        incomeData.push({ "Ledger": "TOTAL", "Amount": totalIncome + (surplus < 0 ? Math.abs(surplus) : 0) })
+
+        exportButton = <ExportExcelButton sheets={[{ name: "Expenditure", data: expenseData }, { name: "Income", data: incomeData }]} filename="Income_Expenditure" />
     } else if (type === "balance-sheet") {
         reportTitle = "Balance Sheet"
         const { assets, liabilities, equity, totalAssets, totalLiabilities, totalEquity } = await getBalanceSheet(to)
@@ -312,6 +346,18 @@ export default async function ReportsPage({
                 </CardContent>
             </Card>
         )
+
+        const liabData = [
+            ...equity.map(r => ({ "Ledger": r.ledgerName, "Amount": r.credit - r.debit })),
+            ...liabilities.map(r => ({ "Ledger": r.ledgerName, "Amount": r.credit - r.debit })),
+            { "Ledger": "Surplus / (Deficit)", "Amount": surplus },
+            { "Ledger": "TOTAL", "Amount": bsTotalL },
+        ]
+        const assetData = [
+            ...assets.map(r => ({ "Ledger": r.ledgerName, "Amount": r.debit - r.credit })),
+            { "Ledger": "TOTAL", "Amount": totalAssets },
+        ]
+        exportButton = <ExportExcelButton sheets={[{ name: "Liabilities & Equity", data: liabData }, { name: "Assets", data: assetData }]} filename="Balance_Sheet" />
     }
 
     return (
@@ -321,6 +367,7 @@ export default async function ReportsPage({
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">{reportTitle}</h1>
                     <p className="text-slate-500">Real-time financial statement reporting.</p>
                 </div>
+                {exportButton}
             </div>
 
             <Suspense fallback={<Card className="h-20 animate-pulse bg-slate-50" />}>

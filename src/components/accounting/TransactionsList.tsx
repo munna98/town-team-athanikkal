@@ -1,8 +1,9 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from "react"
-import { getTransactions, deleteTransaction } from "@/app/actions/accounting"
+import { getTransactions, deleteTransaction, getAllTransactionsForExport } from "@/app/actions/accounting"
 import { formatCurrency } from "@/lib/utils"
+import { exportToExcel } from "@/lib/excel-export"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -10,7 +11,7 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX } from "lucide-react"
+import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX, Download } from "lucide-react"
 import { DownloadReceiptButton, ShareReceiptButton, DownloadPaymentButton, SharePaymentButton } from "@/components/pdf/DownloadButtons"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
@@ -62,6 +63,7 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
     const [fromDate, setFromDate] = useState<string>("")
     const [toDate, setToDate] = useState<string>("")
     const [collectedBy, setCollectedBy] = useState<string>("all")
+    const [exporting, setExporting] = useState(false)
 
     // Debounce search
     useEffect(() => {
@@ -139,6 +141,42 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
         )
     }
 
+    async function handleExportExcel() {
+        setExporting(true)
+        try {
+            const allTxns = await getAllTransactionsForExport({
+                type,
+                search: debouncedSearch,
+                fromDate: fromDate || undefined,
+                toDate: toDate || undefined,
+                collectedBy: collectedBy === "all" ? undefined : collectedBy,
+            })
+
+            const rows = allTxns.map((txn: any) => {
+                const debitNames = txn.lines?.filter((l: any) => Number(l.debit) > 0).map((l: any) => l.ledger?.name).filter(Boolean).join(", ") || "—"
+                const creditNames = txn.lines?.filter((l: any) => Number(l.credit) > 0).map((l: any) => l.ledger?.name).filter(Boolean).join(", ") || "—"
+                return {
+                    "Ref No": txn.referenceNo,
+                    "Date": new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
+                    "Narration": txn.narration || "",
+                    "Debit Ledger": debitNames,
+                    "Credit Ledger": creditNames,
+                    "Amount": Number(txn.totalAmount),
+                    ...(type === "RECEIPT" ? { "Collected By": txn.collectedBy?.name || "" } : {}),
+                }
+            })
+
+            const typeLabel = type.charAt(0) + type.slice(1).toLowerCase()
+            exportToExcel(rows, `${typeLabel}s_Report`, `${typeLabel}s`)
+            toast.success("Excel downloaded successfully")
+        } catch (e) {
+            console.error(e)
+            toast.error("Failed to export")
+        } finally {
+            setExporting(false)
+        }
+    }
+
     return (
         <div className="space-y-4">
             {/* Action Bar & Filters */}
@@ -206,6 +244,18 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                             <FilterX className="h-4 w-4" />
                         </Button>
                     )}
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExportExcel}
+                        disabled={exporting || !data || data.total === 0}
+                        className="h-9 gap-1.5 text-xs bg-white"
+                        title="Export to Excel"
+                    >
+                        {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                        Excel
+                    </Button>
                 </div>
             </div>
 
