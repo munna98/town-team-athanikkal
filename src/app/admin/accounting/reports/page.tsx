@@ -7,6 +7,17 @@ import { ReportFilters } from "@/components/accounting/ReportFilters"
 import { ExportExcelButton } from "@/components/ui/ExportExcelButton"
 import prisma from "@/lib/prisma"
 import { Suspense } from "react"
+import Link from "next/link"
+
+const getBasePath = (type: string) => {
+    switch (type) {
+        case "RECEIPT": return "/admin/accounting/receipts";
+        case "PAYMENT": return "/admin/accounting/payments";
+        case "CONTRA": return "/admin/accounting/contra";
+        case "JOURNAL": return "/admin/accounting/journal";
+        default: return "";
+    }
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -165,7 +176,15 @@ export default async function ReportsPage({
                                         {stmtData.statement.map((tx, idx) => (
                                             <TableRow key={idx}>
                                                 <TableCell>{formatDate(tx.date)}</TableCell>
-                                                <TableCell className="font-mono text-xs text-sky-600">{tx.referenceNo}</TableCell>
+                                                <TableCell className="font-mono text-xs">
+                                                    <Link 
+                                                        href={`${getBasePath(tx.type)}/${tx.id}`}
+                                                        className="text-sky-600 hover:text-sky-800 hover:underline inline-flex items-center gap-1"
+                                                        title="View Details"
+                                                    >
+                                                        {tx.referenceNo}
+                                                    </Link>
+                                                </TableCell>
                                                 <TableCell className="text-sm">{tx.narration}</TableCell>
                                                 <TableCell className="text-right">{tx.debit > 0 ? formatCurrency(tx.debit) : ""}</TableCell>
                                                 <TableCell className="text-right">{tx.credit > 0 ? formatCurrency(tx.credit) : ""}</TableCell>

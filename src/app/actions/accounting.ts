@@ -205,6 +205,7 @@ export async function getTransactions({
             OR: [
                 { referenceNo: { contains: search, mode: "insensitive" } },
                 { narration: { contains: search, mode: "insensitive" } },
+                { lines: { some: { ledger: { name: { contains: search, mode: "insensitive" } } } } },
             ]
         } : {}),
         ...(fromDate && toDate ? {
@@ -271,6 +272,7 @@ export async function getAllTransactionsForExport({
             OR: [
                 { referenceNo: { contains: search, mode: "insensitive" } },
                 { narration: { contains: search, mode: "insensitive" } },
+                { lines: { some: { ledger: { name: { contains: search, mode: "insensitive" } } } } },
             ]
         } : {}),
         ...(fromDate && toDate ? {

@@ -205,6 +205,8 @@ export async function getLedgerStatement(ledgerId: string, from?: Date, to?: Dat
         runningBalance += debit - credit
 
         return {
+            id: line.transaction.id,
+            type: line.transaction.type,
             date: line.transaction.date,
             referenceNo: line.transaction.referenceNo,
             narration: line.transaction.narration,

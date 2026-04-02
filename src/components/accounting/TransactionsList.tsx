@@ -11,7 +11,7 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX, Download } from "lucide-react"
+import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX, Download, Eye } from "lucide-react"
 import { DownloadReceiptButton, ShareReceiptButton, DownloadPaymentButton, SharePaymentButton } from "@/components/pdf/DownloadButtons"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
@@ -185,7 +185,7 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                         className="pl-9 bg-white"
-                        placeholder="Search by ref no or narration..."
+                        placeholder="Search by ref, narration, or ledger..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -339,6 +339,11 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                                                         ) : null}
                                                                     </>
                                                                 )}
+                                                                <Link href={`${editBasePath}/${txn.id}`}>
+                                                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-600 hover:text-slate-900 hover:bg-slate-100" title="View Details">
+                                                                        <Eye className="h-4 w-4" />
+                                                                    </Button>
+                                                                </Link>
                                                                 <Link href={`${editBasePath}/${txn.id}/edit`}>
                                                                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-sky-600 hover:text-sky-700 hover:bg-sky-50" title="Edit Transaction">
                                                                         <Pencil className="h-3 w-3" />
