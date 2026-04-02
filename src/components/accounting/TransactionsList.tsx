@@ -11,24 +11,13 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, Search, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX, Download, Eye } from "lucide-react"
-import { DownloadReceiptButton, ShareReceiptButton, DownloadPaymentButton, SharePaymentButton } from "@/components/pdf/DownloadButtons"
+import { Loader2, Search, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX, Download } from "lucide-react"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select"
 import Link from "next/link"
 import { toast } from "sonner"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { TransactionActions } from "./TransactionActions"
 
 type TxType = "RECEIPT" | "PAYMENT" | "CONTRA" | "JOURNAL"
 
@@ -120,19 +109,6 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
         if (names.length === 0) return "—"
         if (names.length <= 1) return names[0]
         return `${names[0]} + ${names.length - 1} more`
-    }
-
-    function getMemberMobile(txn: any) {
-        if (!txn.lines) return null
-        if (txn.type === "RECEIPT") {
-            const line = txn.lines.find((l: any) => Number(l.credit) > 0 && l.ledger?.member?.mobile)
-            return line?.ledger?.member?.mobile || null
-        }
-        if (txn.type === "PAYMENT") {
-            const line = txn.lines.find((l: any) => Number(l.debit) > 0 && l.ledger?.member?.mobile)
-            return line?.ledger?.member?.mobile || null
-        }
-        return null
     }
 
     function toggleRow(id: string) {
@@ -323,69 +299,14 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                                             {formatCurrency(Number(txn.totalAmount))}
                                                         </TableCell>
                                                         <TableCell onClick={(e) => e.stopPropagation()}>
-                                                            <div className="flex items-center justify-center gap-1">
-                                                                {showPdf && (
-                                                                    <>
-                                                                        {type === "RECEIPT" ? (
-                                                                            <>
-                                                                                <DownloadReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} />
-                                                                                <ShareReceiptButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={getMemberMobile(txn)} />
-                                                                            </>
-                                                                        ) : type === "PAYMENT" ? (
-                                                                            <>
-                                                                                <DownloadPaymentButton transactionId={txn.id} referenceNo={txn.referenceNo} />
-                                                                                <SharePaymentButton transactionId={txn.id} referenceNo={txn.referenceNo} mobile={getMemberMobile(txn)} />
-                                                                            </>
-                                                                        ) : null}
-                                                                    </>
-                                                                )}
-                                                                <Link href={`${editBasePath}/${txn.id}`}>
-                                                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-600 hover:text-slate-900 hover:bg-slate-100" title="View Details">
-                                                                        <Eye className="h-4 w-4" />
-                                                                    </Button>
-                                                                </Link>
-                                                                <Link href={`${editBasePath}/${txn.id}/edit`}>
-                                                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-sky-600 hover:text-sky-700 hover:bg-sky-50" title="Edit Transaction">
-                                                                        <Pencil className="h-3 w-3" />
-                                                                    </Button>
-                                                                </Link>
-                                                                <AlertDialog>
-                                                                    <AlertDialogTrigger asChild>
-                                                                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50" title="Delete Transaction">
-                                                                            <Trash2 className="h-3 w-3" />
-                                                                        </Button>
-                                                                    </AlertDialogTrigger>
-                                                                    <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                                                                        <AlertDialogHeader>
-                                                                            <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
-                                                                            <AlertDialogDescription>
-                                                                                This will permanently delete transaction <strong>{txn.referenceNo}</strong>. This action cannot be undone.
-                                                                            </AlertDialogDescription>
-                                                                        </AlertDialogHeader>
-                                                                        <AlertDialogFooter>
-                                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                            <AlertDialogAction
-                                                                                className="bg-rose-600 hover:bg-rose-700 text-white"
-                                                                                onClick={async (e) => {
-                                                                                    e.stopPropagation();
-                                                                                    try {
-                                                                                        const res = await deleteTransaction(txn.id);
-                                                                                        if (res.error) {
-                                                                                            toast.error(res.error);
-                                                                                        } else {
-                                                                                            toast.success("Transaction deleted successfully");
-                                                                                            load();
-                                                                                        }
-                                                                                    } catch (err: any) {
-                                                                                        toast.error("An error occurred");
-                                                                                    }
-                                                                                }}
-                                                                            >
-                                                                                Delete
-                                                                            </AlertDialogAction>
-                                                                        </AlertDialogFooter>
-                                                                    </AlertDialogContent>
-                                                                </AlertDialog>
+                                                            <div className="flex items-center justify-center">
+                                                                <TransactionActions 
+                                                                    txn={txn} 
+                                                                    type={type} 
+                                                                    editBasePath={editBasePath} 
+                                                                    showPdf={showPdf} 
+                                                                    onDelete={load} 
+                                                                />
                                                             </div>
                                                         </TableCell>
                                                     </TableRow>
