@@ -67,23 +67,26 @@ export async function bulkCreateMembersAction(data: BulkMemberImportRow[]) {
     })
 
     try {
-        const aadhaarNumbers = validatedData.map((item) => item.aadhaarNo)
-        const existingMembers = await prisma.member.findMany({
-            where: {
-                aadhaarNo: {
-                    in: aadhaarNumbers,
-                },
-            },
-            select: {
-                aadhaarNo: true,
-            },
-        })
+        const aadhaarNumbers = validatedData.map((item) => item.aadhaarNo).filter((n): n is string => !!n)
 
-        if (existingMembers.length > 0) {
-            const existingAadhaar = existingMembers[0].aadhaarNo
-            const matchingRow = data.find((item) => item?.aadhaarNo === existingAadhaar)
-            const rowNumber = typeof matchingRow?.__rowNumber === "number" ? matchingRow.__rowNumber : "unknown"
-            throw new Error(`Excel row ${rowNumber}: Aadhaar ${existingAadhaar} already exists in members`)
+        if (aadhaarNumbers.length > 0) {
+            const existingMembers = await prisma.member.findMany({
+                where: {
+                    aadhaarNo: {
+                        in: aadhaarNumbers,
+                    },
+                },
+                select: {
+                    aadhaarNo: true,
+                },
+            })
+
+            if (existingMembers.length > 0) {
+                const existingAadhaar = existingMembers[0].aadhaarNo
+                const matchingRow = data.find((item) => item?.aadhaarNo === existingAadhaar)
+                const rowNumber = typeof matchingRow?.__rowNumber === "number" ? matchingRow.__rowNumber : "unknown"
+                throw new Error(`Excel row ${rowNumber}: Aadhaar ${existingAadhaar} already exists in members`)
+            }
         }
 
         const results = await bulkCreateMembersLib(validatedData)
