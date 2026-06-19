@@ -51,7 +51,7 @@ export async function createMemberWithLedger(data: CreateMemberInput) {
             data: {
                 membershipCode,
                 name: data.name,
-                address1: data.address1 || null,
+                address1: data.address1 || "",
                 address2: data.address2 || null,
                 address3: data.address3 || null,
                 aadhaarNo: data.aadhaarNo || null,
@@ -112,7 +112,7 @@ export async function bulkCreateMembers(dataArray: CreateMemberInput[]) {
                 data: {
                     membershipCode,
                     name: data.name,
-                    address1: data.address1 || null,
+                    address1: data.address1 || "",
                     address2: data.address2 || null,
                     address3: data.address3 || null,
                     aadhaarNo: data.aadhaarNo || null,
