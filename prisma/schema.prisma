@@ -86,11 +86,11 @@ model Member {
   address1         String
   address2         String?
   address3         String?
-  aadhaarNo        String           @unique
+  aadhaarNo        String?          @unique
   mobile           String
   email            String?
-  dob              DateTime
-  bloodGroup       BloodGroup
+  dob              DateTime?
+  bloodGroup       BloodGroup?
   photoUrl         String?
   isExecutive      Boolean          @default(false)
   position         String?
