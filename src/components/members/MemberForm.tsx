@@ -55,7 +55,7 @@ export function MemberForm({
             mobile: initialData?.mobile || "",
             email: initialData?.email || "",
             dob: initialData?.dob ? new Date(initialData.dob).toISOString().split('T')[0] : "",
-            bloodGroup: initialData?.bloodGroup || "O_POS",
+            bloodGroup: initialData?.bloodGroup || undefined,
             isExecutive: initialData?.isExecutive || false,
             position: initialData?.position || "",
             photoUrl: initialData?.photoUrl || "",
@@ -120,7 +120,7 @@ export function MemberForm({
                                     name="dob"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Date of Birth *</FormLabel>
+                                            <FormLabel>Date of Birth</FormLabel>
                                             <FormControl>
                                                 <Input type="date" {...field} />
                                             </FormControl>
@@ -134,7 +134,7 @@ export function MemberForm({
                                     name="bloodGroup"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Blood Group *</FormLabel>
+                                            <FormLabel>Blood Group</FormLabel>
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
@@ -165,7 +165,7 @@ export function MemberForm({
                                     <FormItem>
                                         <FormLabel>Mobile *</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="10-digit number" {...field} />
+                                            <Input placeholder="e.g. +971501234567 or 9876543210" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -191,7 +191,7 @@ export function MemberForm({
                                 name="aadhaarNo"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Aadhaar Number *</FormLabel>
+                                        <FormLabel>Aadhaar Number</FormLabel>
                                         <FormControl>
                                             <Input placeholder="12-digit number" {...field} disabled={isEditing} />
                                         </FormControl>
@@ -279,7 +279,7 @@ export function MemberForm({
                                         name="address1"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>House/Building *</FormLabel>
+                                                <FormLabel>House/Building</FormLabel>
                                                 <FormControl>
                                                     <Input {...field} />
                                                 </FormControl>
