@@ -186,7 +186,7 @@ export function MemberTable() {
                                     "Code": m.membershipCode,
                                     "Name": m.name,
                                     "Mobile": m.mobile,
-                                    "Blood Group": bloodGroupLabels[m.bloodGroup] || m.bloodGroup,
+                                    "Blood Group": m.bloodGroup ? (bloodGroupLabels[m.bloodGroup] || m.bloodGroup) : "-",
                                     "Status": tierName,
                                     "Executive": m.isExecutive ? "Yes" : "No",
                                     "Active": m.isActive ? "Yes" : "No",
@@ -318,7 +318,7 @@ export function MemberTable() {
                                     </div>
                                     <div className="min-w-0 rounded-lg bg-slate-50 px-3 py-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-500">Blood Group</p>
-                                        <p className="mt-1 font-medium text-slate-800">{bloodGroupLabels[member.bloodGroup]}</p>
+                                        <p className="mt-1 font-medium text-slate-800">{member.bloodGroup ? (bloodGroupLabels[member.bloodGroup] || member.bloodGroup) : "-"}</p>
                                     </div>
                                     <div className="min-w-0 rounded-lg bg-slate-50 px-3 py-2">
                                         <p className="text-xs uppercase tracking-wide text-slate-500">Total Paid</p>
@@ -415,7 +415,7 @@ export function MemberTable() {
                                             </div>
                                         </TableCell>
                                         <TableCell>{member.mobile}</TableCell>
-                                        <TableCell>{bloodGroupLabels[member.bloodGroup]}</TableCell>
+                                        <TableCell>{member.bloodGroup ? (bloodGroupLabels[member.bloodGroup] || member.bloodGroup) : "-"}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="border-none" style={{ backgroundColor: tierBg, color: tierColor }}>
                                                 {tierName}

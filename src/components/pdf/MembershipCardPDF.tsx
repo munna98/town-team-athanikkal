@@ -270,7 +270,7 @@ interface MembershipCardProps {
     logoUrl?: string
     name: string
     membershipCode: string
-    bloodGroup: string
+    bloodGroup: string | null
     mobile: string
     photoUrl?: string | null
     membershipStatus: string
@@ -301,7 +301,7 @@ function PDFCardContent({
         year: "numeric",
     })
 
-    const displayBloodGroup = bloodGroup.replace("_POS", "+").replace("_NEG", "-")
+    const displayBloodGroup = bloodGroup ? bloodGroup.replace("_POS", "+").replace("_NEG", "-") : "-"
 
     return (
         <View style={s.card}>

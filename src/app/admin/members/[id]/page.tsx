@@ -211,14 +211,16 @@ export default async function MemberDetailPage({
                             <div className="flex items-start gap-3">
                                 <CreditCard className="h-5 w-5 text-slate-400 shrink-0 mt-0.5" />
                                 <div>
-                                    <div className="text-sm font-medium text-slate-900">{member.aadhaarNo}</div>
+                                    <div className="text-sm font-medium text-slate-900">{member.aadhaarNo || "-"}</div>
                                     <div className="text-xs text-slate-500">Aadhaar</div>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
                                 <Activity className="h-5 w-5 text-slate-400 shrink-0 mt-0.5" />
                                 <div>
-                                    <div className="text-sm font-medium text-slate-900">{bloodGroupLabels[member.bloodGroup]}</div>
+                                    <div className="text-sm font-medium text-slate-900">
+                                        {member.bloodGroup ? (bloodGroupLabels[member.bloodGroup] || member.bloodGroup) : "-"}
+                                    </div>
                                     <div className="text-xs text-slate-500">Blood Group</div>
                                 </div>
                             </div>
