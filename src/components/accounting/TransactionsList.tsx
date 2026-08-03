@@ -11,7 +11,7 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, Search, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX, Download } from "lucide-react"
+import { Loader2, Search, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, User, Clock, History, LayoutPanelLeft, FilterX, Download, FileText } from "lucide-react"
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select"
@@ -254,9 +254,9 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                             <TableHead className="w-10 text-center">#</TableHead>
                                             <TableHead className="w-24">Ref No</TableHead>
                                             <TableHead className="w-24 px-0">Date</TableHead>
-                                            <TableHead>Narration</TableHead>
+                                            <TableHead className="hidden lg:table-cell">Narration</TableHead>
                                             <TableHead className="hidden lg:table-cell">Debit</TableHead>
-                                            <TableHead className="hidden lg:table-cell">Credit</TableHead>
+                                            <TableHead>Credit</TableHead>
                                             <TableHead className="text-right w-24">Amount</TableHead>
                                             <TableHead className="text-center w-28">Actions</TableHead>
                                         </TableRow>
@@ -280,7 +280,7 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                                         <TableCell className="text-xs text-slate-600 whitespace-nowrap px-0">
                                                             {formatDate(txn.date)}
                                                         </TableCell>
-                                                        <TableCell className="max-w-[200px]">
+                                                        <TableCell className="hidden lg:table-cell max-w-[200px]">
                                                             <div className="text-xs text-slate-700 truncate" title={txn.narration}>
                                                                 {txn.narration || <span className="text-slate-400 italic">No narration</span>}
                                                             </div>
@@ -290,7 +290,7 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                                                 {getDebitLedgers(txn)}
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="hidden lg:table-cell max-w-[120px]">
+                                                        <TableCell className="max-w-[120px]">
                                                             <div className="text-xs text-slate-700 font-medium truncate" title={getCreditLedgers(txn)}>
                                                                 {getCreditLedgers(txn)}
                                                             </div>
@@ -312,12 +312,24 @@ export function TransactionsList({ type, editBasePath, showPdf = false, executiv
                                                     </TableRow>
                                                     {isExpanded && (
                                                         <TableRow className="bg-slate-50/50">
-                                                            <TableCell colSpan={7} className="p-0 border-t-0">
-                                                                <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                            <TableCell colSpan={8} className="p-0 border-t-0">
+                                                                <div className="p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                                    {txn.narration && (
+                                                                        <div className="space-y-2">
+                                                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                                                <FileText className="h-3 w-3" />
+                                                                                Narration
+                                                                            </div>
+                                                                            <div className="text-xs text-slate-700 font-medium pl-3 border-l-2 border-slate-200">
+                                                                                {txn.narration}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+
                                                                     <div className="space-y-2">
                                                                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                                             <User className="h-3 w-3" />
-                                                                            {type === "RECEIPT" ? "Collected By" : null}
+                                                                            {type === "RECEIPT" ? "Collected By" : "Collected By / Details"}
                                                                         </div>
                                                                         <div className="text-xs text-slate-700 font-semibold pl-3 border-l-2 border-slate-200">
                                                                             {txn.collectedBy?.name || <span className="text-slate-400">Generic</span>}
