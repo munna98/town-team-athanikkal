@@ -105,8 +105,11 @@ export interface DateRange {
 }
 
 export interface LedgerStatementLine {
+    id: string
+    type: string
     date: Date
     referenceNo: string
+    particulars: string
     narration: string
     debit: number
     credit: number

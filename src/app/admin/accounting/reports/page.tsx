@@ -161,7 +161,7 @@ export default async function ReportsPage({
                                         <TableRow>
                                             <TableHead>Date</TableHead>
                                             <TableHead>Voucher</TableHead>
-                                            <TableHead>Narration</TableHead>
+                                            <TableHead>Particulars</TableHead>
                                             <TableHead className="text-right text-emerald-700">Debit</TableHead>
                                             <TableHead className="text-right text-red-700">Credit</TableHead>
                                             <TableHead className="text-right">Balance</TableHead>
@@ -185,7 +185,12 @@ export default async function ReportsPage({
                                                         {tx.referenceNo}
                                                     </Link>
                                                 </TableCell>
-                                                <TableCell className="text-sm">{tx.narration}</TableCell>
+                                                <TableCell className="text-sm">
+                                                    <div className="font-medium text-slate-800">{tx.particulars}</div>
+                                                    {tx.narration && (
+                                                        <div className="text-xs text-slate-400 font-normal">{tx.narration}</div>
+                                                    )}
+                                                </TableCell>
                                                 <TableCell className="text-right">{tx.debit > 0 ? formatCurrency(tx.debit) : ""}</TableCell>
                                                 <TableCell className="text-right">{tx.credit > 0 ? formatCurrency(tx.credit) : ""}</TableCell>
                                                 <TableCell className="text-right font-medium text-slate-600">
@@ -210,7 +215,8 @@ export default async function ReportsPage({
             const exportData = stmtData.statement.map((tx: any) => ({
                 "Date": formatDate(tx.date),
                 "Voucher": tx.referenceNo,
-                "Narration": tx.narration,
+                "Particulars": tx.particulars,
+                "Narration": tx.narration || "",
                 "Debit": tx.debit > 0 ? tx.debit : "",
                 "Credit": tx.credit > 0 ? tx.credit : "",
                 "Balance": `${Math.abs(tx.balance).toFixed(2)} ${tx.balance >= 0 ? "Dr" : "Cr"}`,

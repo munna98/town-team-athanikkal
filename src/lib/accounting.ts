@@ -182,7 +182,17 @@ export async function getLedgerStatement(ledgerId: string, from?: Date, to?: Dat
             transaction: dateFilter,
         },
         include: {
-            transaction: true,
+            transaction: {
+                include: {
+                    lines: {
+                        include: {
+                            ledger: {
+                                select: { id: true, name: true, code: true }
+                            }
+                        }
+                    }
+                }
+            },
         },
         orderBy: [
             { transaction: { date: "asc" } },
@@ -204,12 +214,27 @@ export async function getLedgerStatement(ledgerId: string, from?: Date, to?: Dat
         const credit = Number(line.credit)
         runningBalance += debit - credit
 
+        const counterLines = line.transaction.lines.filter((l) => l.ledgerId !== ledgerId)
+        let particulars = ""
+        if (counterLines.length === 1) {
+            particulars = counterLines[0].ledger.name
+        } else if (counterLines.length > 1) {
+            particulars = counterLines.map((l) => l.ledger.name).join(", ")
+        } else {
+            particulars = line.description || line.transaction.narration || "As per details"
+        }
+
+        const narrationText = line.description && line.description !== line.transaction.narration
+            ? `${line.transaction.narration} (${line.description})`
+            : line.transaction.narration
+
         return {
             id: line.transaction.id,
             type: line.transaction.type,
             date: line.transaction.date,
             referenceNo: line.transaction.referenceNo,
-            narration: line.transaction.narration,
+            particulars,
+            narration: narrationText,
             debit,
             credit,
             balance: runningBalance,
